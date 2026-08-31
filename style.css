@@ -35,18 +35,37 @@ body, button, input, select, textarea {
   background: #94a3b8;
 }
 
-/* Symbols & Highlights */
+/* Import Official Korean Exam Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700;900&family=Pretendard:wght@400;500;600;700;800;900&display=swap');
+
+/* Typography & Passage Styling (Official LEET Exam Feel) */
+.font-passage {
+  font-family: 'Noto Serif KR', 'Batang', serif;
+  font-size: 1.0625rem;
+  line-height: 1.85;
+  letter-spacing: -0.015em;
+  color: #1e293b;
+  text-align: justify;
+  text-justify: inter-word;
+  word-break: keep-all;
+}
+
+.font-passage p {
+  margin-bottom: 1.25rem;
+  text-indent: 0.5rem;
+}
+
+/* Symbol & Bogi Formatting */
+.symbol-bracket {
+  color: #4f46e5;
+  font-weight: 700;
+}
+
 .symbol-circle {
   font-weight: 700;
-  display: inline-block;
+  color: #1e293b;
 }
-.symbol-bracket {
-  font-weight: 700;
-  color: #1e1b4b;
-  background-color: #f1f5f9;
-  padding: 0 3px;
-  border-radius: 4px;
-}
+
 .symbol-bogi {
   color: #0f172a;
   font-weight: 700;
@@ -57,13 +76,50 @@ body, button, input, select, textarea {
 /* LEET Exam Specific Box */
 .leet-box {
   background-color: #f8fafc;
-  border: 1px solid #cbd5e1;
-  border-radius: 0.5rem;
-  padding: 1rem 1.25rem;
-  line-height: 1.75;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 0.75rem;
+  padding: 1.25rem 1.5rem;
+  line-height: 1.8;
   white-space: pre-wrap;
   word-break: keep-all;
+  font-family: 'Noto Serif KR', serif;
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+.leet-box .bogi-item {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin-top: 0.35rem;
+}
+
+/* Bookmark Star Button */
+.bookmark-btn {
+  transition: all 0.15s ease;
+  user-select: none;
+  cursor: pointer;
+}
+.bookmark-btn.active {
+  color: #f59e0b !important;
+  background-color: #fef3c7 !important;
+  border-color: #fcd34d !important;
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.3);
+}
+
+/* Target Filter Chips */
+.target-chip.selected {
+  background-color: #4f46e5 !important;
+  color: #ffffff !important;
+  border-color: #6366f1 !important;
+}
+
+/* Search Results Dropdown */
+.search-result-item {
+  transition: background 0.1s ease;
+  cursor: pointer;
+}
+.search-result-item:hover {
+  background-color: #334155;
 }
 
 /* Highlighting styles */

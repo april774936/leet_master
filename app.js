@@ -1,5 +1,5 @@
-// LEET Interactive Training Platform Engine v3.0
-// Features: Multi-Year Selection, Drag Slider, Full Paper Exam Mode, Question Memo & Wrong Notes Review, 3in1 Sets, LocalStorage Persistence, Safe Random Shuffle, Keyboard Shortcuts, Touch Swipe
+// LEET Interactive Training Platform Engine v3.2
+// Features: Multi-Year Selection, Drag Range Slider, Full-Exam Mode, Bookmark Archive, Wrong Notes Archive, Quick Syntax Search (e.g. 26추11, 24언3), Official Paper Typography, Mobile Swipe
 
 class LeetApp {
   constructor() {
@@ -11,7 +11,7 @@ class LeetApp {
     // View state: 'home' or 'exam'
     this.currentView = 'home';
     
-    // Exam mode: 'set' (Set-by-Set) or 'full' (Full Exam Paper)
+    // Exam mode: 'set' (Set-by-Set) or 'full' (Full Exam Paper Continuous View)
     this.examMode = 'set';
     
     // Mobile Tab state: 'passage' or 'questions'
@@ -23,22 +23,21 @@ class LeetApp {
     // Filter state
     this.selectedSubject = '언어이해'; // 'all', '언어이해', '추리논증'
     this.selectedYears = ['2026', '2025', '2024', '2023', '2022', '2021', '2020', '2019', '2018', '2017', '2016', '2015', '2014', '2013', '2012', '2011', '2010', '2009'];
-    this.selectedLimit = '5'; // '1', '3', '5', '10', '20', 'all'
+    this.selectedLimit = '5'; // '1'..'30' or 'all'
+    this.targetFilter = 'all'; // 'all', 'bookmark', 'wrong', 'unsolved'
     this.isShuffled = false;
-    this.onlyWrongMode = false;
     
     // User progress state (Persisted in LocalStorage)
     this.userAnswers = {}; // { qId: optionNum (1..5) }
     this.checkedSets = {}; // { setId: boolean }
-    this.wrongHistory = {}; // { qId: { qId, setId, year, subject, qNum, tag, userAns, correctAns, timestamp } }
+    this.wrongHistory = {}; // { qId: { qId, setId, year, subject, qNum, userAns, correctAns, timestamp } }
     this.userMemos = {}; // { qId: memoString }
+    this.bookmarks = {}; // { qId: boolean }
     this.isExamSubmitted = false;
     
     // UI states
     this.fontSize = 'md';
-    this.isHighlighterActive = false;
-    this.currentHighlightColor = 'yellow';
-    this.openMemos = new Set(); // qIds of currently expanded memo boxes
+    this.openMemos = new Set();
     
     // Timer state
     this.timerSeconds = 0;
@@ -46,14 +45,12 @@ class LeetApp {
     this.timerInterval = null;
     this.isTimerRunning = false;
     
-    // Resizer state
-    this.isDraggingResizer = false;
-    
     this.STORAGE_KEYS = {
       ANSWERS: 'LEET_USER_ANSWERS_V3',
       CHECKED: 'LEET_CHECKED_SETS_V3',
       WRONG: 'LEET_WRONG_HISTORY_V3',
       MEMOS: 'LEET_USER_MEMOS_V3',
+      BOOKMARKS: 'LEET_BOOKMARKS_V3',
       SETTINGS: 'LEET_SETTINGS_V3'
     };
     
@@ -95,6 +92,9 @@ class LeetApp {
       const savedMemos = localStorage.getItem(this.STORAGE_KEYS.MEMOS);
       if (savedMemos) this.userMemos = JSON.parse(savedMemos);
 
+      const savedBookmarks = localStorage.getItem(this.STORAGE_KEYS.BOOKMARKS);
+      if (savedBookmarks) this.bookmarks = JSON.parse(savedBookmarks);
+
       const savedSettings = localStorage.getItem(this.STORAGE_KEYS.SETTINGS);
       if (savedSettings) {
         const s = JSON.parse(savedSettings);
@@ -102,6 +102,7 @@ class LeetApp {
         if (s.years && Array.isArray(s.years)) this.selectedYears = s.years;
         if (s.limit) this.selectedLimit = s.limit;
         if (s.mode) this.examMode = s.mode;
+        if (s.targetFilter) this.targetFilter = s.targetFilter;
         if (s.fontSize) this.fontSize = s.fontSize;
         if (s.passageSide) this.passageSide = s.passageSide;
       }
@@ -116,11 +117,13 @@ class LeetApp {
       localStorage.setItem(this.STORAGE_KEYS.CHECKED, JSON.stringify(this.checkedSets));
       localStorage.setItem(this.STORAGE_KEYS.WRONG, JSON.stringify(this.wrongHistory));
       localStorage.setItem(this.STORAGE_KEYS.MEMOS, JSON.stringify(this.userMemos));
+      localStorage.setItem(this.STORAGE_KEYS.BOOKMARKS, JSON.stringify(this.bookmarks));
       localStorage.setItem(this.STORAGE_KEYS.SETTINGS, JSON.stringify({
         subject: this.selectedSubject,
         years: this.selectedYears,
         limit: this.selectedLimit,
         mode: this.examMode,
+        targetFilter: this.targetFilter,
         fontSize: this.fontSize,
         passageSide: this.passageSide
       }));
@@ -169,7 +172,6 @@ class LeetApp {
     }
   }
 
-  // --- SLIDER METRICS ---
   updateSliderMetrics() {
     const slider = document.getElementById('homeLimitSlider');
     const badge = document.getElementById('sliderMetricBadge');
@@ -251,31 +253,26 @@ class LeetApp {
     });
 
     const wrongCount = Object.keys(this.wrongHistory).length;
+    const bookmarkCount = Object.keys(this.bookmarks).length;
     const accuracy = answeredCount > 0 ? ((correctCount / answeredCount) * 100).toFixed(0) : 0;
 
     const elTotal = document.getElementById('homeTotalSolved');
     const elAcc = document.getElementById('homeAccuracyRate');
+    const elBookmark = document.getElementById('homeBookmarkCount');
     const elWrong = document.getElementById('homeWrongCount');
-    const elWrongLabel = document.getElementById('homeWrongOnlyCountLabel');
+    const elTargetBookmark = document.getElementById('targetBookmarkCount');
+    const elTargetWrong = document.getElementById('targetWrongCount');
 
     if (elTotal) elTotal.textContent = `${answeredCount} / ${totalQuestions}`;
     if (elAcc) elAcc.textContent = `${accuracy}%`;
+    if (elBookmark) elBookmark.textContent = `${bookmarkCount}개`;
     if (elWrong) elWrong.textContent = `${wrongCount}개`;
-    if (elWrongLabel) elWrongLabel.textContent = `${wrongCount}문제`;
+    if (elTargetBookmark) elTargetBookmark.textContent = `${bookmarkCount}`;
+    if (elTargetWrong) elTargetWrong.textContent = `${wrongCount}`;
   }
 
   syncSavedSettingsToUI() {
-    // Sync Exam Header Subject buttons
-    document.querySelectorAll('.filter-subject-btn').forEach(b => {
-      const isMatch = b.dataset.subject === this.selectedSubject;
-      b.classList.toggle('bg-indigo-600', isMatch);
-      b.classList.toggle('text-white', isMatch);
-      b.classList.toggle('shadow-sm', isMatch);
-      b.classList.toggle('bg-slate-100', !isMatch);
-      b.classList.toggle('text-slate-700', !isMatch);
-    });
-
-    // Sync Home Subject Cards (Dark theme vibrant styles)
+    // Subject Cards
     document.querySelectorAll('#homeSubjectCards .setup-card').forEach(c => {
       const isMatch = c.dataset.val === this.selectedSubject;
       c.classList.toggle('selected', isMatch);
@@ -283,7 +280,17 @@ class LeetApp {
       c.classList.toggle('border-slate-700', !isMatch);
     });
 
-    // Sync Home Exam Mode Cards
+    // Target Filter Chips
+    document.querySelectorAll('#homeTargetFilterChips .target-chip').forEach(c => {
+      const isMatch = c.dataset.target === this.targetFilter;
+      c.classList.toggle('selected', isMatch);
+      c.classList.toggle('bg-indigo-600', isMatch);
+      c.classList.toggle('text-white', isMatch);
+      c.classList.toggle('border-indigo-500', isMatch);
+      c.classList.toggle('bg-slate-800', !isMatch);
+    });
+
+    // Exam Mode Cards
     document.querySelectorAll('#homeExamModeCards .mode-card').forEach(c => {
       const isMatch = c.dataset.mode === this.examMode;
       c.classList.toggle('selected', isMatch);
@@ -291,7 +298,7 @@ class LeetApp {
       c.classList.toggle('border-slate-700', !isMatch);
     });
 
-    // Sync Limit Slider
+    // Limit Slider
     const slider = document.getElementById('homeLimitSlider');
     if (slider) {
       if (this.selectedLimit === 'all') slider.value = 30;
@@ -299,17 +306,14 @@ class LeetApp {
     }
     this.updateSliderMetrics();
 
-    // Sync Checkboxes
-    const mobileShuffle = document.getElementById('homeShuffleCheckbox');
-    if (mobileShuffle) mobileShuffle.checked = this.isShuffled;
-
-    const mobileWrong = document.getElementById('homeWrongOnlyCheckbox');
-    if (mobileWrong) mobileWrong.checked = this.onlyWrongMode;
+    // Shuffle Checkbox
+    const homeShuffle = document.getElementById('homeShuffleCheckbox');
+    if (homeShuffle) homeShuffle.checked = this.isShuffled;
 
     this.setFontSize(this.fontSize);
   }
 
-  // --- FILTER ENGINE ---
+  // --- FILTER & JUMP ENGINE ---
   applyFilters() {
     let list = [...this.rawSets];
     
@@ -323,12 +327,16 @@ class LeetApp {
       list = list.filter(s => this.selectedYears.includes(String(s.year)));
     }
 
-    // Only Wrong Filter (오답 노트 모드)
-    if (this.onlyWrongMode) {
+    // Target Range Filter
+    if (this.targetFilter === 'bookmark') {
+      list = list.filter(s => s.questions.some(q => this.bookmarks[q.id]));
+    } else if (this.targetFilter === 'wrong') {
       list = list.filter(s => s.questions.some(q => this.wrongHistory[q.id]));
+    } else if (this.targetFilter === 'unsolved') {
+      list = list.filter(s => s.questions.some(q => this.userAnswers[q.id] === undefined));
     }
     
-    // Safe Random Shuffle
+    // Random Shuffle
     if (this.isShuffled) {
       list = this.fisherYatesShuffle([...list]);
     }
@@ -342,9 +350,6 @@ class LeetApp {
     this.filteredSets = list;
     this.currentSetIndex = 0;
     this.activeQuestionIndex = 0;
-    
-    this.updateShuffleUI();
-    this.updateWrongModeUI();
     
     if (this.examMode === 'full') {
       this.renderFullPaperMode();
@@ -365,36 +370,109 @@ class LeetApp {
     return array;
   }
 
-  toggleShuffle() {
-    this.isShuffled = !this.isShuffled;
-    const homeShuffleCheckbox = document.getElementById('homeShuffleCheckbox');
-    if (homeShuffleCheckbox) homeShuffleCheckbox.checked = this.isShuffled;
-    this.applyFilters();
+  // --- QUICK SEARCH & SHORTCUT JUMP ENGINE ---
+  // Matches: 26추11, 26추리11, 2026 추리 11, 24언3, 24언어3, etc.
+  handleQuickSearch(query) {
+    if (!query || !query.trim()) return;
+    const q = query.trim().replace(/\s+/g, '');
+
+    // 1. Check syntax match (e.g. 26추11, 2026추리논증11, 24언3)
+    const syntaxMatch = q.match(/^(\d{2,4})(언어|언|추리|추|논증)(\d{1,2})$/);
+    if (syntaxMatch) {
+      let yr = syntaxMatch[1];
+      if (yr.length === 2) yr = '20' + yr;
+      const subKey = syntaxMatch[2];
+      const subject = (subKey.startsWith('언')) ? '언어이해' : '추리논증';
+      const qNum = parseInt(syntaxMatch[3]);
+
+      this.jumpToSpecificQuestion(yr, subject, qNum);
+      return;
+    }
+
+    // 2. Keyword Search
+    const results = [];
+    const kw = query.trim().toLowerCase();
+
+    for (let sIdx = 0; sIdx < this.rawSets.length; sIdx++) {
+      const s = this.rawSets[sIdx];
+      for (let qIdx = 0; qIdx < s.questions.length; qIdx++) {
+        const question = s.questions[qIdx];
+        if (
+          question.prompt.toLowerCase().includes(kw) || 
+          (question.box && question.box.toLowerCase().includes(kw)) ||
+          (s.passage && s.passage.toLowerCase().includes(kw)) ||
+          question.options.some(o => o.toLowerCase().includes(kw))
+        ) {
+          results.push({ set: s, question: question, sIdx, qIdx });
+          if (results.length >= 10) break;
+        }
+      }
+      if (results.length >= 10) break;
+    }
+
+    this.renderSearchResultsDropdown(results);
   }
 
-  toggleWrongMode() {
-    this.onlyWrongMode = !this.onlyWrongMode;
-    const homeWrongOnlyCheckbox = document.getElementById('homeWrongOnlyCheckbox');
-    if (homeWrongOnlyCheckbox) homeWrongOnlyCheckbox.checked = this.onlyWrongMode;
-    this.applyFilters();
-  }
+  jumpToSpecificQuestion(year, subject, qNum) {
+    const targetSetIndex = this.rawSets.findIndex(s => 
+      String(s.year) === String(year) && 
+      s.subject === subject && 
+      s.questions.some(q => q.qNum === qNum)
+    );
 
-  updateShuffleUI() {
-    const shuffleBtn = document.getElementById('shuffleToggleBtn');
-    if (shuffleBtn) {
-      shuffleBtn.classList.toggle('bg-amber-100', this.isShuffled);
-      shuffleBtn.classList.toggle('text-amber-800', this.isShuffled);
-      shuffleBtn.classList.toggle('border-amber-300', this.isShuffled);
+    if (targetSetIndex === -1) {
+      alert(`${year}학년도 ${subject} ${qNum}번 문항을 찾을 수 없습니다.`);
+      return;
+    }
+
+    // Switch view and set filteredSets to encompass target
+    this.selectedSubject = subject;
+    this.selectedYears = [String(year)];
+    this.selectedLimit = 'all';
+    this.targetFilter = 'all';
+
+    this.showView('exam');
+    
+    // Find the index in filteredSets
+    const newIdx = this.filteredSets.findIndex(s => 
+      String(s.year) === String(year) && 
+      s.subject === subject && 
+      s.questions.some(q => q.qNum === qNum)
+    );
+
+    if (newIdx !== -1) {
+      this.currentSetIndex = newIdx;
+      const qIdx = this.filteredSets[newIdx].questions.findIndex(q => q.qNum === qNum);
+      this.activeQuestionIndex = qIdx !== -1 ? qIdx : 0;
+      this.renderCurrentSet();
+      this.scrollToQuestion(this.activeQuestionIndex);
     }
   }
 
-  updateWrongModeUI() {
-    const wrongBtn = document.getElementById('wrongFilterBtn');
-    if (wrongBtn) {
-      wrongBtn.classList.toggle('bg-rose-100', this.onlyWrongMode);
-      wrongBtn.classList.toggle('text-rose-800', this.onlyWrongMode);
-      wrongBtn.classList.toggle('border-rose-300', this.onlyWrongMode);
+  renderSearchResultsDropdown(results) {
+    const dropdown = document.getElementById('homeSearchResultsDropdown');
+    if (!dropdown) return;
+
+    if (results.length === 0) {
+      dropdown.innerHTML = '<div class="p-3 text-xs text-slate-400 text-center">검색 결과가 없습니다.</div>';
+      dropdown.classList.remove('hidden');
+      return;
     }
+
+    dropdown.innerHTML = results.map(r => `
+      <div 
+        class="search-result-item p-3 border-b border-slate-700 last:border-0 hover:bg-slate-700/70 cursor-pointer"
+        onclick="app.jumpToSpecificQuestion('${r.set.year}', '${r.set.subject}', ${r.question.qNum}); document.getElementById('homeSearchResultsDropdown').classList.add('hidden');"
+      >
+        <div class="flex items-center gap-1.5 mb-1">
+          <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">${r.set.year}년 ${r.set.subject}</span>
+          <span class="text-xs font-bold text-white">Q${r.question.qNum}번</span>
+        </div>
+        <p class="text-[11px] text-slate-300 truncate">${r.question.prompt}</p>
+      </div>
+    `).join('');
+
+    dropdown.classList.remove('hidden');
   }
 
   // --- TIMER ENGINE ---
@@ -402,7 +480,6 @@ class LeetApp {
     if (this.isTimerRunning) return;
     this.isTimerRunning = true;
     
-    // In Full Exam mode: set official countdown (언어이해 70분 = 4200s, 추리논증 125분 = 7500s)
     if (this.examMode === 'full' && this.timerSeconds === 0) {
       this.timerSeconds = this.selectedSubject === '언어이해' ? 4200 : 7500;
       this.timerCountdown = true;
@@ -535,9 +612,10 @@ class LeetApp {
     const tabsContainer = document.getElementById('setQuestionTabs');
     if (tabsContainer) tabsContainer.innerHTML = '';
     
-    const emptyMsg = this.onlyWrongMode 
-      ? '🎉 등록된 오답이 없습니다! 모든 문제를 맞히셨거나 오답 노트가 비어 있습니다.' 
-      : '선택하신 조건에 일치하는 문항이 없습니다. 연도 다중 선택을 확인해 주세요.';
+    let emptyMsg = '선택하신 조건에 일치하는 문항이 없습니다. 연도 다중 선택을 확인해 주세요.';
+    if (this.targetFilter === 'bookmark') emptyMsg = '⭐ 북마크된 문항이 없습니다. 문제 우측 상단의 별표를 눌러 북마크를 추가해 보세요!';
+    else if (this.targetFilter === 'wrong') emptyMsg = '🎉 축하합니다! 등록된 오답이 없습니다.';
+    else if (this.targetFilter === 'unsolved') emptyMsg = '🏆 모든 문제를 이미 다 풀이하셨습니다!';
       
     if (passageBody) passageBody.innerHTML = `<div class="p-8 text-center text-slate-400 font-medium">${emptyMsg}</div>`;
     if (questionsContainer) questionsContainer.innerHTML = `<div class="p-8 text-center text-slate-400 font-medium">${emptyMsg}</div>`;
@@ -556,9 +634,8 @@ class LeetApp {
       badgesEl.innerHTML = `
         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold border ${subjectColor}">${set.subject}</span>
         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-800 border border-slate-300">${set.year}학년도</span>
-        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-300">${set.questions.map(q=>q.qNum).join('~')}번 세트</span>
+        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-300">${set.questions.map(q=>q.qNum).join('~')}번</span>
         ${set.questions.length > 1 ? `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">🔥 다문항 세트 (${set.questions.length}문항)</span>` : ''}
-        ${this.isShuffled ? `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300">🔀 셔플</span>` : ''}
       `;
     }
 
@@ -569,7 +646,7 @@ class LeetApp {
     if (bodyEl) {
       if (!set.passage || !set.passage.trim()) {
         bodyEl.innerHTML = `
-          <div class="bg-indigo-50/70 border border-indigo-200 rounded-xl p-5 text-indigo-900 text-sm leading-relaxed">
+          <div class="bg-indigo-50/70 border border-indigo-200 rounded-xl p-5 text-indigo-900 text-sm leading-relaxed font-passage">
             <h4 class="font-bold text-base mb-1">💡 단독 문항 제시문 안내</h4>
             <p>본 문제는 우측 문제 영역에 기재된 사실관계, 법안 및 조건을 종합하여 풀이하는 단독 추리/논증 문항입니다.</p>
           </div>
@@ -579,7 +656,7 @@ class LeetApp {
         const formatted = paragraphs
           .map(p => p.trim())
           .filter(p => p.length > 0)
-          .map(p => `<p class="mb-4 text-slate-800 leading-relaxed font-passage">${this.formatInlineText(p)}</p>`)
+          .map(p => `<p class="mb-4 text-slate-900 leading-relaxed font-passage">${this.formatInlineText(p)}</p>`)
           .join('');
         bodyEl.innerHTML = formatted;
       }
@@ -587,11 +664,15 @@ class LeetApp {
   }
 
   formatInlineText(text) {
+    if (!text) return '';
     let t = text;
     t = t.replace(/(\[[A-Z]\])/g, '<span class="symbol-bracket">$1</span>');
-    t = t.replace(/([㉠㉡㉢㉣㉤])/g, '<u><span class="symbol-circle">$1</span></u>');
-    t = t.replace(/([ⓐⓑⓒⓓⓔ])/g, '<span class="symbol-circle">$1</span>');
-    t = t.replace(/(?:\n|\A)([ㄱㄴㄷㄹㅁ]\.)/g, '<br><strong class="symbol-bogi">$1</strong>');
+    t = t.replace(/([㉠㉡㉢㉣㉤])/g, '<u><span class="symbol-circle font-bold">$1</span></u>');
+    t = t.replace(/([ⓐⓑⓒⓓⓔ])/g, '<span class="symbol-circle font-bold">$1</span>');
+    
+    // Bogi items with hanging indent
+    t = t.replace(/(?:\n|\A)\s*([ㄱ-ㅁ]\.)\s*([^
+]+)/g, '<div class="bogi-item flex items-start gap-1.5 mt-1"><strong class="symbol-bogi font-black flex-shrink-0">$1</strong><span class="flex-1">$2</span></div>');
     return t;
   }
 
@@ -613,7 +694,6 @@ class LeetApp {
       const isCurrentActive = idx === this.activeQuestionIndex;
       const isChecked = this.checkedSets[set.id];
       const isCorrect = isChecked && this.userAnswers[q.id] === q.answer;
-      const isWrong = isChecked && isAnswered && !isCorrect;
 
       let statusBadge = '';
       if (isChecked) {
@@ -657,6 +737,7 @@ class LeetApp {
       const isWrong = isChecked && isAnswered && !isCorrect;
       const memoText = this.userMemos[q.id] || '';
       const isMemoOpen = this.openMemos.has(q.id) || !!memoText;
+      const isBookmarked = !!this.bookmarks[q.id];
 
       html += `
         <div id="qCard_idx_${qIndex}" class="question-card bg-white rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-sm transition mb-6 ${isChecked ? (isCorrect ? 'border-emerald-300 ring-1 ring-emerald-200' : 'border-rose-300 ring-1 ring-rose-200') : ''}">
@@ -672,8 +753,15 @@ class LeetApp {
               ${isWrong ? `<span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-rose-100 text-rose-800">오답 ✕ (공식 정답: ${q.answer}번)</span>` : ''}
             </div>
 
-            <!-- Action Buttons (Memo & Bookmark) -->
+            <!-- Action Buttons (Bookmark & Memo) -->
             <div class="flex items-center gap-1.5">
+              <button 
+                onclick="app.toggleBookmark('${q.id}')" 
+                class="bookmark-btn px-2.5 py-1 rounded-lg text-xs font-bold border transition flex items-center gap-1 ${isBookmarked ? 'active bg-amber-100 text-amber-800 border-amber-300' : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200'}"
+                title="중요 문항 북마크"
+              >
+                <span>${isBookmarked ? '⭐ 북마크됨' : '☆ 북마크'}</span>
+              </button>
               <button 
                 onclick="app.toggleMemo('${q.id}')" 
                 class="px-2.5 py-1 rounded-lg text-xs font-semibold border transition flex items-center gap-1 ${memoText ? 'bg-amber-50 text-amber-800 border-amber-300' : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200'}"
@@ -684,25 +772,25 @@ class LeetApp {
             </div>
           </div>
 
-          <!-- Prompt Question Text -->
+          <!-- Prompt Question Text (Crisp Typography) -->
           <h3 class="text-base sm:text-lg font-bold text-slate-900 leading-relaxed mb-4">
             ${this.formatInlineText(q.prompt)}
           </h3>
 
-          <!-- Box Content (규정 / 보기 / 사례 / 표) -->
+          <!-- Box Content (규정 / 보기 / 상황 / 사례 / 표) with clean border box -->
           ${q.box ? `
-            <div class="leet-box mb-5 text-sm text-slate-800">
+            <div class="leet-box mb-5 text-sm sm:text-base text-slate-900">
               ${this.formatInlineText(q.box)}
             </div>
           ` : ''}
 
           <!-- 5-Option Choices List -->
-          <div class="space-y-2.5 mb-5">
+          <div class="space-y-2.5 mb-5 font-passage">
             ${q.options.map((optText, optIdx) => {
               const optNum = optIdx + 1;
               const isSelected = userAns === optNum;
               
-              let optStyleClass = 'border-slate-200 bg-white hover:bg-indigo-50/50 hover:border-indigo-300 text-slate-800';
+              let optStyleClass = 'border-slate-200 bg-white hover:bg-indigo-50/50 hover:border-indigo-300 text-slate-900';
               let badgeStyleClass = 'bg-slate-100 text-slate-700 border-slate-300';
 
               if (isChecked) {
@@ -730,7 +818,7 @@ class LeetApp {
                   <span class="flex-shrink-0 w-6 h-6 rounded-full border text-xs font-bold flex items-center justify-center ${badgeStyleClass}">
                     ${circleSymbols[optIdx]}
                   </span>
-                  <span class="text-sm sm:text-base leading-relaxed flex-1 pt-0.5">
+                  <span class="text-sm sm:text-base leading-relaxed flex-1 pt-0.5 font-medium">
                     ${optText}
                   </span>
                 </div>
@@ -747,7 +835,7 @@ class LeetApp {
             <textarea 
               rows="2" 
               placeholder="이 문제의 함정 포인트, 헷갈린 선지, 핵심 키워드를 메모해 보세요..."
-              class="w-full text-xs p-2.5 bg-white border border-amber-300 rounded-lg outline-none focus:ring-2 focus:ring-amber-500 text-slate-800"
+              class="w-full text-xs p-2.5 bg-white border border-amber-300 rounded-lg outline-none focus:ring-2 focus:ring-amber-500 text-slate-800 font-sans"
               oninput="app.saveMemo('${q.id}', this.value)"
             >${memoText}</textarea>
           </div>
@@ -759,7 +847,7 @@ class LeetApp {
                 <span class="text-indigo-600">💡 공식 해설 및 정답</span>
                 <span class="font-black text-indigo-700">[정답: ${q.answer}번]</span>
               </div>
-              <p class="text-xs sm:text-sm text-slate-700 leading-relaxed">
+              <p class="text-xs sm:text-sm text-slate-700 leading-relaxed font-passage">
                 ${q.explanation || `${set.year}학년도 LEET ${set.subject} ${q.qNum}번 기출 문항입니다.`}
               </p>
             </div>
@@ -769,7 +857,7 @@ class LeetApp {
       `;
     });
 
-    // Bottom Action Bar: Check Answers / Next Set
+    // Action Bar
     html += `
       <div class="flex items-center gap-3 pt-2 pb-8">
         <button 
@@ -817,7 +905,6 @@ class LeetApp {
       headerTitle.textContent = `📜 ${this.selectedSubject} 실전 전체 시험지 모드 (${totalSets.length}개 세트)`;
     }
 
-    // Combine all passages and questions in a continuous scroll view
     if (passagePane) {
       let passageHTML = `
         <div class="mb-6 p-4 bg-indigo-900 text-white rounded-2xl">
@@ -826,7 +913,7 @@ class LeetApp {
         </div>
       `;
 
-      totalSets.forEach((set, sIdx) => {
+      totalSets.forEach((set) => {
         if (set.passage && set.passage.trim()) {
           passageHTML += `
             <div class="passage-section mb-10 pb-8 border-b-2 border-slate-200">
@@ -858,12 +945,13 @@ class LeetApp {
         </div>
       `;
 
-      totalSets.forEach((set, sIdx) => {
-        set.questions.forEach((q, qIdx) => {
+      totalSets.forEach((set) => {
+        set.questions.forEach((q) => {
           const userAns = this.userAnswers[q.id];
           const isChecked = this.isExamSubmitted;
           const isCorrect = isChecked && userAns === q.answer;
           const memoText = this.userMemos[q.id] || '';
+          const isBookmarked = !!this.bookmarks[q.id];
 
           questionsHTML += `
             <div class="question-card bg-white rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-sm mb-6">
@@ -872,14 +960,19 @@ class LeetApp {
                   <span class="w-7 h-7 rounded-lg bg-slate-900 text-white font-black text-xs flex items-center justify-center">${q.qNum}</span>
                   <span class="text-xs font-bold text-slate-500">${set.year}학년도 ${set.subject}</span>
                 </div>
-                <button onclick="app.toggleMemo('${q.id}')" class="text-xs text-slate-500 hover:text-indigo-600">📝 메모</button>
+                <div class="flex items-center gap-1.5">
+                  <button onclick="app.toggleBookmark('${q.id}')" class="text-xs font-bold ${isBookmarked ? 'text-amber-500' : 'text-slate-400 hover:text-slate-600'}">
+                    ${isBookmarked ? '⭐' : '☆'}
+                  </button>
+                  <button onclick="app.toggleMemo('${q.id}')" class="text-xs text-slate-500 hover:text-indigo-600">📝 메모</button>
+                </div>
               </div>
 
               <h4 class="text-base font-bold text-slate-900 mb-3">${this.formatInlineText(q.prompt)}</h4>
 
-              ${q.box ? `<div class="leet-box text-sm mb-4">${this.formatInlineText(q.box)}</div>` : ''}
+              ${q.box ? `<div class="leet-box text-sm sm:text-base mb-4">${this.formatInlineText(q.box)}</div>` : ''}
 
-              <div class="space-y-2 mb-4">
+              <div class="space-y-2 mb-4 font-passage">
                 ${q.options.map((opt, oIdx) => {
                   const oNum = oIdx + 1;
                   const isSel = userAns === oNum;
@@ -919,6 +1012,97 @@ class LeetApp {
 
       questionsPane.innerHTML = questionsHTML;
     }
+  }
+
+  // --- BOOKMARK ENGINE ---
+  toggleBookmark(qId) {
+    if (this.bookmarks[qId]) {
+      delete this.bookmarks[qId];
+    } else {
+      this.bookmarks[qId] = true;
+    }
+    if (navigator.vibrate) navigator.vibrate(10);
+    this.saveToStorage();
+    
+    if (this.examMode === 'full') {
+      this.renderFullPaperMode();
+    } else {
+      this.renderQuestions(this.filteredSets[this.currentSetIndex]);
+    }
+    this.updateHomeDashboard();
+  }
+
+  openBookmarksModal() {
+    const modal = document.getElementById('bookmarksModal');
+    if (!modal) return;
+    modal.classList.remove('hidden');
+    this.renderBookmarksList('all');
+  }
+
+  renderBookmarksList(subjectFilter = 'all') {
+    const container = document.getElementById('bookmarksListContainer');
+    const countBadge = document.getElementById('bookmarksCountBadge');
+    if (!container) return;
+
+    let bookmarkedQuestions = [];
+    this.rawSets.forEach(s => {
+      s.questions.forEach(q => {
+        if (this.bookmarks[q.id]) {
+          if (subjectFilter === 'all' || s.subject === subjectFilter) {
+            bookmarkedQuestions.push({ set: s, question: q });
+          }
+        }
+      });
+    });
+
+    if (countBadge) countBadge.textContent = `총 ${bookmarkedQuestions.length}개 문항`;
+
+    if (bookmarkedQuestions.length === 0) {
+      container.innerHTML = `
+        <div class="text-center py-16 text-slate-400">
+          <span class="text-4xl block mb-2">⭐</span>
+          <p class="font-bold text-base text-slate-700">북마크된 문항이 없습니다!</p>
+          <p class="text-xs text-slate-400 mt-1">문제 카드 우측 상단의 '☆ 북마크' 버튼을 눌러 중요한 문제를 저장해 보세요.</p>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = bookmarkedQuestions.map(item => {
+      const q = item.question;
+      const s = item.set;
+      const memo = this.userMemos[q.id] || '';
+
+      return `
+        <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="px-2.5 py-1 rounded-lg bg-amber-100 text-amber-800 font-black text-xs">${s.year}학년도 ${s.subject} ${q.qNum}번</span>
+              <span class="text-xs font-semibold text-slate-500">공식 정답: <strong class="text-emerald-600">${q.answer}번</strong></span>
+            </div>
+            <div class="flex items-center gap-2">
+              <button 
+                onclick="app.jumpToSpecificQuestion('${s.year}', '${s.subject}', ${q.qNum}); document.getElementById('bookmarksModal').classList.add('hidden');" 
+                class="px-2.5 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs transition"
+              >
+                풀러가기 ➔
+              </button>
+              <button onclick="app.toggleBookmark('${q.id}'); app.renderBookmarksList('${subjectFilter}');" class="text-xs text-slate-400 hover:text-rose-600 transition">
+                ✕ 해제
+              </button>
+            </div>
+          </div>
+
+          <h4 class="text-sm font-bold text-slate-900">${this.formatInlineText(q.prompt)}</h4>
+
+          ${memo ? `
+            <div class="p-2.5 bg-amber-50 rounded-xl border border-amber-200 text-xs text-amber-900">
+              <span class="font-bold">📝 나의 메모:</span> ${memo}
+            </div>
+          ` : ''}
+        </div>
+      `;
+    }).join('');
   }
 
   // --- QUESTION MEMO ENGINE ---
@@ -986,16 +1170,24 @@ class LeetApp {
               <span class="px-2.5 py-1 rounded-lg bg-rose-100 text-rose-800 font-black text-xs">${item.year}학년도 ${item.subject} ${item.qNum}번</span>
               <span class="text-xs font-semibold text-slate-500">내 답안: <strong class="text-rose-600">${item.userAns}번</strong> / 정답: <strong class="text-emerald-600">${item.correctAns}번</strong></span>
             </div>
-            <button onclick="app.removeWrongNote('${item.qId}')" class="text-xs text-slate-400 hover:text-rose-600 transition">
-              ✕ 오답 해제
-            </button>
+            <div class="flex items-center gap-2">
+              <button 
+                onclick="app.jumpToSpecificQuestion('${item.year}', '${item.subject}', ${item.qNum}); document.getElementById('wrongNotesModal').classList.add('hidden');" 
+                class="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs transition"
+              >
+                다시풀기 ➔
+              </button>
+              <button onclick="app.removeWrongNote('${item.qId}')" class="text-xs text-slate-400 hover:text-rose-600 transition">
+                ✕ 해제
+              </button>
+            </div>
           </div>
 
           <div class="p-3 bg-amber-50 rounded-xl border border-amber-200">
             <span class="text-[11px] font-bold text-amber-900 block mb-1">📝 나의 오답 메모:</span>
             <textarea 
               rows="2" 
-              class="w-full text-xs p-2 bg-white border border-amber-300 rounded-lg text-slate-800"
+              class="w-full text-xs p-2 bg-white border border-amber-300 rounded-lg text-slate-800 font-sans"
               placeholder="오답 원인과 팁을 적어보세요..."
               oninput="app.saveMemo('${item.qId}', this.value)"
             >${memo}</textarea>
@@ -1097,7 +1289,6 @@ class LeetApp {
         const ans = this.userAnswers[q.id];
         const isChecked = this.checkedSets[s.id];
         const isCorrect = isChecked && ans === q.answer;
-        const isWrong = isChecked && ans !== undefined && !isCorrect;
 
         let badgeColor = 'bg-slate-100 text-slate-700 border-slate-300';
         if (isChecked) {
@@ -1132,7 +1323,6 @@ class LeetApp {
     this.isExamSubmitted = true;
     this.pauseTimer();
 
-    // Check all sets
     this.filteredSets.forEach(s => {
       this.checkedSets[s.id] = true;
       s.questions.forEach(q => {
@@ -1184,7 +1374,32 @@ class LeetApp {
 
   // --- EVENT BINDINGS ---
   bindEvents() {
-    // Home Subject Cards
+    // Quick Search Input Bindings (Home & Mobile)
+    const homeSearch = document.getElementById('homeHeaderSearchInput');
+    const mobileSearch = document.getElementById('homeMobileSearchInput');
+    
+    if (homeSearch) {
+      homeSearch.addEventListener('input', (e) => this.handleQuickSearch(e.target.value));
+      homeSearch.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') this.handleQuickSearch(e.target.value);
+      });
+    }
+
+    if (mobileSearch) {
+      mobileSearch.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') this.handleQuickSearch(e.target.value);
+      });
+    }
+
+    // Close search dropdown on click outside
+    document.addEventListener('click', (e) => {
+      const dropdown = document.getElementById('homeSearchResultsDropdown');
+      if (dropdown && !e.target.closest('#homeHeaderSearchInput')) {
+        dropdown.classList.add('hidden');
+      }
+    });
+
+    // Subject Cards
     document.querySelectorAll('#homeSubjectCards .setup-card').forEach(card => {
       card.addEventListener('click', () => {
         this.selectedSubject = card.dataset.val;
@@ -1192,7 +1407,15 @@ class LeetApp {
       });
     });
 
-    // Home Mode Cards
+    // Target Filter Chips
+    document.querySelectorAll('#homeTargetFilterChips .target-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        this.targetFilter = chip.dataset.target;
+        this.syncSavedSettingsToUI();
+      });
+    });
+
+    // Exam Mode Cards
     document.querySelectorAll('#homeExamModeCards .mode-card').forEach(card => {
       card.addEventListener('click', () => {
         this.examMode = card.dataset.mode;
@@ -1319,6 +1542,51 @@ class LeetApp {
       omrCloseBtn.addEventListener('click', () => omrModal.classList.add('hidden'));
     }
 
+    // Bookmark Modal Listeners
+    const openBookmarkBtn = document.getElementById('homeOpenBookmarksBtn');
+    const closeBookmarkBtn = document.getElementById('closeBookmarksBtn');
+    const startRetryBookmarkBtn = document.getElementById('startRetryBookmarkBtn');
+
+    if (openBookmarkBtn) openBookmarkBtn.addEventListener('click', () => this.openBookmarksModal());
+    if (closeBookmarkBtn) {
+      const modal = document.getElementById('bookmarksModal');
+      closeBookmarkBtn.addEventListener('click', () => modal && modal.classList.add('hidden'));
+    }
+    if (startRetryBookmarkBtn) {
+      startRetryBookmarkBtn.addEventListener('click', () => {
+        const modal = document.getElementById('bookmarksModal');
+        if (modal) modal.classList.add('hidden');
+        this.targetFilter = 'bookmark';
+        this.showView('exam');
+      });
+    }
+
+    // Bookmark Subject Filters
+    const bmAll = document.getElementById('bookmarkFilterSubjectAll');
+    const bmLang = document.getElementById('bookmarkFilterSubjectLang');
+    const bmReason = document.getElementById('bookmarkFilterSubjectReason');
+
+    if (bmAll && bmLang && bmReason) {
+      bmAll.addEventListener('click', () => {
+        bmAll.className = 'px-2.5 py-1 rounded-lg bg-amber-500 text-white font-bold transition';
+        bmLang.className = 'px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 transition';
+        bmReason.className = 'px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 transition';
+        this.renderBookmarksList('all');
+      });
+      bmLang.addEventListener('click', () => {
+        bmLang.className = 'px-2.5 py-1 rounded-lg bg-amber-500 text-white font-bold transition';
+        bmAll.className = 'px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 transition';
+        bmReason.className = 'px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 transition';
+        this.renderBookmarksList('언어이해');
+      });
+      bmReason.addEventListener('click', () => {
+        bmReason.className = 'px-2.5 py-1 rounded-lg bg-amber-500 text-white font-bold transition';
+        bmAll.className = 'px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 transition';
+        bmLang.className = 'px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 transition';
+        this.renderBookmarksList('추리논증');
+      });
+    }
+
     // Wrong Notes Modal Listeners
     const openWrongBtn = document.getElementById('homeOpenWrongNotesBtn');
     const closeWrongBtn = document.getElementById('closeWrongNotesBtn');
@@ -1333,7 +1601,7 @@ class LeetApp {
       startRetryWrongBtn.addEventListener('click', () => {
         const modal = document.getElementById('wrongNotesModal');
         if (modal) modal.classList.add('hidden');
-        this.onlyWrongMode = true;
+        this.targetFilter = 'wrong';
         this.showView('exam');
       });
     }
@@ -1391,11 +1659,12 @@ class LeetApp {
     const homeResetAllBtn = document.getElementById('homeResetAllBtn');
     if (homeResetAllBtn) {
       homeResetAllBtn.addEventListener('click', () => {
-        if (confirm('저장된 모든 문제의 풀이 기록과 오답 노트를 초기화하시겠습니까?')) {
+        if (confirm('저장된 모든 문제의 풀이 기록, 북마크 및 오답 노트를 초기화하시겠습니까?')) {
           this.userAnswers = {};
           this.checkedSets = {};
           this.wrongHistory = {};
           this.userMemos = {};
+          this.bookmarks = {};
           this.isExamSubmitted = false;
           this.saveToStorage();
           this.applyFilters();
