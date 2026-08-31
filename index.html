@@ -804,8 +804,10 @@
     </div>
   </div>
 
+  <!-- CRITICAL: App Proxy Stub (MUST load first to prevent onclick ReferenceError) -->
+  <script src="./app_stub.js?v=3.4.4"></script>
   <!-- Database and Application JS -->
-  <script src="./data/leet_data.js?v=3.4.3"></script>
-  <script src="./app.js?v=3.4.3"></script>
+  <script src="./data/leet_data.js?v=3.4.4"></script>
+  <script src="./app.js?v=3.4.4"></script>
 </body>
 </html>

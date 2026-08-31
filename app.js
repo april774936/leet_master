@@ -1671,10 +1671,15 @@ class LeetApp {
   }
 }
 
-// Global App Instance (Immediate and Event Fallback)
+// Global App Instance - calls _leetInitReal to flush queued clicks
 function initLeetApp() {
-  if (!window.app) {
-    window.app = new LeetApp();
+  if (window._leetInitDone) return;
+  window._leetInitDone = true;
+  const realApp = new LeetApp();
+  if (typeof window._leetInitReal === 'function') {
+    window._leetInitReal(realApp);
+  } else {
+    window.app = realApp;
   }
 }
 
@@ -1683,4 +1688,6 @@ if (document.readyState === 'loading') {
 } else {
   initLeetApp();
 }
-window.addEventListener('load', initLeetApp);
+window.addEventListener('load', function() {
+  if (!window._leetInitDone) initLeetApp();
+});
