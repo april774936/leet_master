@@ -56,14 +56,14 @@ class LeetApp {
   init() {
     this.loadFromStorage();
     
-    if (window.LEET_DATABASE && window.LEET_DATABASE.sets) {
-      this.rawSets = window.LEET_DATABASE.sets;
+    if (window.LEET_DATABASE) {
+      this.rawSets = Array.isArray(window.LEET_DATABASE) ? window.LEET_DATABASE : (window.LEET_DATABASE.sets || []);
       this.initUI();
     } else {
       fetch('./data/leet_database.json')
         .then(res => res.json())
         .then(data => {
-          this.rawSets = data.sets;
+          this.rawSets = Array.isArray(data) ? data : (data.sets || []);
           this.initUI();
         })
         .catch(err => {
