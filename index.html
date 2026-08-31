@@ -100,7 +100,7 @@
           </label>
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-3" id="homeSubjectCards">
             <!-- 언어이해 Card -->
-            <div data-val="언어이해" class="setup-card selected rounded-2xl p-4 relative flex flex-col justify-between border-2 border-indigo-500">
+            <div onclick="app.selectSubject('언어이해')" data-val="언어이해" class="setup-card selected rounded-2xl p-4 relative flex flex-col justify-between border-2 border-indigo-500 cursor-pointer">
               <div>
                 <div class="flex items-center justify-between mb-2">
                   <span class="text-2xl">📖</span>
@@ -113,7 +113,7 @@
             </div>
 
             <!-- 추리논증 Card -->
-            <div data-val="추리논증" class="setup-card rounded-2xl p-4 relative flex flex-col justify-between border-2 border-slate-700">
+            <div onclick="app.selectSubject('추리논증')" data-val="추리논증" class="setup-card rounded-2xl p-4 relative flex flex-col justify-between border-2 border-slate-700 cursor-pointer">
               <div>
                 <div class="flex items-center justify-between mb-2">
                   <span class="text-2xl">💡</span>
@@ -126,7 +126,7 @@
             </div>
 
             <!-- 전체 풀기 Card -->
-            <div data-val="all" class="setup-card rounded-2xl p-4 relative flex flex-col justify-between border-2 border-slate-700">
+            <div onclick="app.selectSubject('all')" data-val="all" class="setup-card rounded-2xl p-4 relative flex flex-col justify-between border-2 border-slate-700 cursor-pointer">
               <div>
                 <div class="flex items-center justify-between mb-2">
                   <span class="text-2xl">🏆</span>
@@ -142,41 +142,52 @@
 
         <!-- STEP 2: 기출 연도 다중 중복 선택 (Multi-Year) -->
         <div>
-          <div class="flex items-center justify-between mb-2 flex-wrap gap-2">
+          <div class="flex items-center justify-between mb-2.5 flex-wrap gap-2">
             <label class="block text-xs font-bold uppercase tracking-wider text-indigo-400">
-              STEP 2 · 기출 연도 다중 선택 (<span id="selectedYearsCountText" class="text-white">전체 18개년</span>)
+              STEP 2 · 기출 연도 세부 선택 (<span id="selectedYearsCountText" class="text-white">전체 18개년</span>)
             </label>
             <div class="flex items-center gap-1 text-[11px]">
-              <button id="presetAllYearsBtn" class="px-2 py-0.5 rounded-md bg-slate-700 hover:bg-slate-600 text-indigo-300 font-bold transition">전체</button>
-              <button id="presetRecent3Btn" class="px-2 py-0.5 rounded-md bg-slate-700 hover:bg-slate-600 text-slate-300 transition">최근 3개년</button>
-              <button id="presetRecent5Btn" class="px-2 py-0.5 rounded-md bg-slate-700 hover:bg-slate-600 text-slate-300 transition">최근 5개년</button>
-              <button id="presetClearYearsBtn" class="px-2 py-0.5 rounded-md bg-slate-700 hover:bg-slate-600 text-rose-300 transition">해제</button>
+              <button onclick="app.presetYears('all')" class="px-2.5 py-1 rounded-lg bg-slate-700 hover:bg-slate-600 text-indigo-300 font-bold transition">전체</button>
+              <button onclick="app.presetYears('recent3')" class="px-2.5 py-1 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300 transition">최근 3개년</button>
+              <button onclick="app.presetYears('recent5')" class="px-2.5 py-1 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300 transition">최근 5개년</button>
+              <button onclick="app.presetYears('early5')" class="px-2.5 py-1 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300 transition">초기 5개년</button>
+              <button onclick="app.presetYears('clear')" class="px-2.5 py-1 rounded-lg bg-slate-700 hover:bg-slate-600 text-rose-300 transition">해제</button>
             </div>
           </div>
-          <div class="flex flex-wrap gap-1.5 sm:gap-2" id="homeMultiYearChips">
+          <div class="grid grid-cols-3 sm:grid-cols-6 gap-2" id="homeMultiYearChips">
             <!-- Rendered dynamically 2026 ~ 2009 chips -->
           </div>
         </div>
 
-        <!-- STEP 3: 풀이 분량 드래그 슬라이더 -->
+        <!-- STEP 3: 풀이 분량 (세트 수) 세부 선택 -->
         <div>
-          <div class="flex items-center justify-between mb-2">
+          <div class="flex items-center justify-between mb-2.5">
             <label class="block text-xs font-bold uppercase tracking-wider text-indigo-400">
-              STEP 3 · 풀이할 분량 조절 (드래그)
+              STEP 3 · 풀이할 분량 선택
             </label>
             <span id="sliderMetricBadge" class="text-xs font-bold px-2.5 py-1 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-              ⚡ 5세트 (약 15문항 · 45분 예상)
+              ⚡ 5세트 (약 15문항 · 50분 예상)
             </span>
           </div>
-          <div class="space-y-3 bg-slate-900/60 p-4 rounded-2xl border border-slate-700">
-            <input type="range" id="homeLimitSlider" min="1" max="30" value="5" class="w-full h-2.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-indigo-500">
-            <div class="flex justify-between text-[11px] text-slate-400 font-mono">
-              <span>1세트</span>
-              <span>5세트</span>
-              <span>10세트</span>
-              <span>20세트</span>
-              <button id="sliderMaxBtn" class="font-bold text-indigo-400 hover:underline">선택 연도 전체</button>
-            </div>
+          <div class="grid grid-cols-2 sm:grid-cols-6 gap-2" id="homeLimitChipsContainer">
+            <button onclick="app.selectLimit('1')" data-limit="1" class="limit-chip chip-btn px-3 py-2.5 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700 text-center">
+              ☕ 1세트 <span class="block text-[10px] text-slate-400 font-normal mt-0.5">약 3문항 (10분)</span>
+            </button>
+            <button onclick="app.selectLimit('3')" data-limit="3" class="limit-chip chip-btn px-3 py-2.5 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700 text-center">
+              ⚡ 3세트 <span class="block text-[10px] text-slate-400 font-normal mt-0.5">약 9문항 (30분)</span>
+            </button>
+            <button onclick="app.selectLimit('5')" data-limit="5" class="limit-chip chip-btn selected px-3 py-2.5 rounded-xl text-xs font-bold bg-indigo-600 text-white border border-indigo-500 shadow text-center">
+              🔥 5세트 <span class="block text-[10px] text-indigo-200 font-normal mt-0.5">약 15문항 (50분)</span>
+            </button>
+            <button onclick="app.selectLimit('10')" data-limit="10" class="limit-chip chip-btn px-3 py-2.5 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700 text-center">
+              🎯 10세트 <span class="block text-[10px] text-slate-400 font-normal mt-0.5">약 30문항 (100분)</span>
+            </button>
+            <button onclick="app.selectLimit('20')" data-limit="20" class="limit-chip chip-btn px-3 py-2.5 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700 text-center">
+              💪 20세트 <span class="block text-[10px] text-slate-400 font-normal mt-0.5">약 60문항 (200분)</span>
+            </button>
+            <button onclick="app.selectLimit('all')" data-limit="all" class="limit-chip chip-btn px-3 py-2.5 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700 text-center">
+              🏆 전체 풀기 <span class="block text-[10px] text-slate-400 font-normal mt-0.5">선택 연도 전범위</span>
+            </button>
           </div>
         </div>
 
@@ -186,16 +197,16 @@
             STEP 4 · 풀이 대상 범위 선택
           </label>
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-2" id="homeTargetFilterChips">
-            <button data-target="all" class="chip-btn target-chip selected px-3 py-2.5 rounded-xl text-xs font-bold bg-indigo-600 text-white border border-indigo-500 shadow text-center">
+            <button onclick="app.selectTarget('all')" data-target="all" class="chip-btn target-chip selected px-3 py-2.5 rounded-xl text-xs font-bold bg-indigo-600 text-white border border-indigo-500 shadow text-center">
               🌟 전체 문항
             </button>
-            <button data-target="bookmark" class="chip-btn target-chip px-3 py-2.5 rounded-xl text-xs font-bold bg-slate-800 text-amber-300 border border-slate-700 hover:bg-slate-700 text-center">
+            <button onclick="app.selectTarget('bookmark')" data-target="bookmark" class="chip-btn target-chip px-3 py-2.5 rounded-xl text-xs font-bold bg-slate-800 text-amber-300 border border-slate-700 hover:bg-slate-700 text-center">
               ⭐ 북마크만 (<span id="targetBookmarkCount">0</span>)
             </button>
-            <button data-target="wrong" class="chip-btn target-chip px-3 py-2.5 rounded-xl text-xs font-bold bg-slate-800 text-rose-300 border border-slate-700 hover:bg-slate-700 text-center">
+            <button onclick="app.selectTarget('wrong')" data-target="wrong" class="chip-btn target-chip px-3 py-2.5 rounded-xl text-xs font-bold bg-slate-800 text-rose-300 border border-slate-700 hover:bg-slate-700 text-center">
               ❌ 오답 노트만 (<span id="targetWrongCount">0</span>)
             </button>
-            <button data-target="unsolved" class="chip-btn target-chip px-3 py-2.5 rounded-xl text-xs font-bold bg-slate-800 text-emerald-300 border border-slate-700 hover:bg-slate-700 text-center">
+            <button onclick="app.selectTarget('unsolved')" data-target="unsolved" class="chip-btn target-chip px-3 py-2.5 rounded-xl text-xs font-bold bg-slate-800 text-emerald-300 border border-slate-700 hover:bg-slate-700 text-center">
               ⏳ 안 푼 문제만
             </button>
           </div>
@@ -208,7 +219,7 @@
           </label>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="homeExamModeCards">
             <!-- Mode 1: 세트 단위 풀기 -->
-            <div data-mode="set" class="mode-card selected bg-slate-800 border-2 border-indigo-500 rounded-2xl p-4 cursor-pointer transition">
+            <div onclick="app.selectMode('set')" data-mode="set" class="mode-card selected bg-slate-800 border-2 border-indigo-500 rounded-2xl p-4 cursor-pointer transition">
               <div class="flex items-center gap-2 mb-1">
                 <span class="text-xl">⚡</span>
                 <h4 class="font-black text-sm text-white">세트 집중 훈련 모드</h4>
@@ -217,7 +228,7 @@
             </div>
 
             <!-- Mode 2: 실전 전체 시험지 모드 -->
-            <div data-mode="full" class="mode-card bg-slate-800 border-2 border-slate-700 hover:border-slate-600 rounded-2xl p-4 cursor-pointer transition">
+            <div onclick="app.selectMode('full')" data-mode="full" class="mode-card bg-slate-800 border-2 border-slate-700 hover:border-slate-600 rounded-2xl p-4 cursor-pointer transition">
               <div class="flex items-center gap-2 mb-1">
                 <span class="text-xl">📜</span>
                 <h4 class="font-black text-sm text-white">실전 전체 시험지 모드 (PDF형)</h4>
@@ -237,7 +248,7 @@
 
         <!-- START BUTTON (BIG CTA) -->
         <div class="pt-2">
-          <button id="homeStartBtn" class="w-full py-4 rounded-2xl bg-indigo-600 hover:bg-indigo-500 active:scale-[0.99] text-white text-base sm:text-lg font-black shadow-xl shadow-indigo-600/30 transition flex items-center justify-center gap-2">
+          <button onclick="app.showView('exam')" id="homeStartBtn" class="w-full py-4 rounded-2xl bg-indigo-600 hover:bg-indigo-500 active:scale-[0.99] text-white text-base sm:text-lg font-black shadow-xl shadow-indigo-600/30 transition flex items-center justify-center gap-2">
             <span>🚀 LEET 실전 트레이닝 시작하기</span>
           </button>
         </div>

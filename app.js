@@ -1,5 +1,5 @@
-// LEET Interactive Training Platform Engine v3.2
-// Features: Multi-Year Selection, Drag Range Slider, Full-Exam Mode, Bookmark Archive, Wrong Notes Archive, Quick Syntax Search (e.g. 26추11, 24언3), Official Paper Typography, Mobile Swipe
+// LEET Interactive Training Platform Engine v3.3
+// Features: Granular Multi-Year Selection, Direct Limit Chips (No Slider), Bookmark Archive, Wrong Notes Archive, Quick Syntax Search (26추11, 24언3), Official Paper Typography, Mobile Swipe
 
 class LeetApp {
   constructor() {
@@ -23,7 +23,7 @@ class LeetApp {
     // Filter state
     this.selectedSubject = '언어이해'; // 'all', '언어이해', '추리논증'
     this.selectedYears = ['2026', '2025', '2024', '2023', '2022', '2021', '2020', '2019', '2018', '2017', '2016', '2015', '2014', '2013', '2012', '2011', '2010', '2009'];
-    this.selectedLimit = '5'; // '1'..'30' or 'all'
+    this.selectedLimit = '5'; // '1', '3', '5', '10', '20', 'all'
     this.targetFilter = 'all'; // 'all', 'bookmark', 'wrong', 'unsolved'
     this.isShuffled = false;
     
@@ -134,14 +134,14 @@ class LeetApp {
 
   initUI() {
     this.renderHomeMultiYearChips();
-    this.updateSliderMetrics();
+    this.updateLimitMetrics();
     this.bindEvents();
     this.syncSavedSettingsToUI();
     this.updateHomeDashboard();
     this.showView('home');
   }
 
-  // --- HOME MULTI-YEAR SELECTION ---
+  // --- GRANULAR YEAR SELECTION ---
   renderHomeMultiYearChips() {
     const container = document.getElementById('homeMultiYearChips');
     if (!container) return;
@@ -150,11 +150,48 @@ class LeetApp {
     
     container.innerHTML = allYears.map(yr => {
       const isSelected = this.selectedYears.includes(yr);
-      const selClass = isSelected ? 'selected bg-indigo-600 text-white border-indigo-500 shadow-sm font-bold' : 'bg-slate-800 text-slate-400 border-slate-700 hover:bg-slate-700 hover:text-slate-200';
-      return `<button data-year="${yr}" class="multi-year-chip px-3 py-1.5 rounded-xl text-xs border transition ${selClass}">${yr}년</button>`;
+      const selClass = isSelected 
+        ? 'selected bg-indigo-600 text-white border-indigo-500 shadow-md font-bold' 
+        : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700 hover:text-white';
+      return `
+        <button 
+          onclick="app.toggleYear('${yr}')" 
+          class="year-chip px-3 py-2 rounded-xl text-xs border transition flex items-center justify-between ${selClass}"
+        >
+          <span>${yr}년</span>
+          <span class="text-[10px] ${isSelected ? 'text-indigo-200' : 'text-slate-500'}">${isSelected ? '✓' : ''}</span>
+        </button>
+      `;
     }).join('');
 
     this.updateSelectedYearsCountBadge();
+  }
+
+  toggleYear(yr) {
+    if (this.selectedYears.includes(yr)) {
+      this.selectedYears = this.selectedYears.filter(y => y !== yr);
+    } else {
+      this.selectedYears.push(yr);
+      this.selectedYears.sort((a, b) => parseInt(b) - parseInt(a));
+    }
+    this.renderHomeMultiYearChips();
+    this.saveToStorage();
+  }
+
+  presetYears(type) {
+    if (type === 'all') {
+      this.selectedYears = Array.from({length: 18}, (_, i) => String(2026 - i));
+    } else if (type === 'recent3') {
+      this.selectedYears = ['2026', '2025', '2024'];
+    } else if (type === 'recent5') {
+      this.selectedYears = ['2026', '2025', '2024', '2023', '2022'];
+    } else if (type === 'early5') {
+      this.selectedYears = ['2013', '2012', '2011', '2010', '2009'];
+    } else if (type === 'clear') {
+      this.selectedYears = [];
+    }
+    this.renderHomeMultiYearChips();
+    this.saveToStorage();
   }
 
   updateSelectedYearsCountBadge() {
@@ -172,17 +209,70 @@ class LeetApp {
     }
   }
 
-  updateSliderMetrics() {
-    const slider = document.getElementById('homeLimitSlider');
+  // --- GRANULAR LIMIT SELECTION ---
+  selectLimit(limitVal) {
+    this.selectedLimit = String(limitVal);
+    document.querySelectorAll('#homeLimitChipsContainer .limit-chip').forEach(c => {
+      const isMatch = c.dataset.limit === this.selectedLimit;
+      c.classList.toggle('selected', isMatch);
+      c.classList.toggle('bg-indigo-600', isMatch);
+      c.classList.toggle('text-white', isMatch);
+      c.classList.toggle('border-indigo-500', isMatch);
+      c.classList.toggle('bg-slate-800', !isMatch);
+      c.classList.toggle('text-slate-300', !isMatch);
+    });
+    this.updateLimitMetrics();
+    this.saveToStorage();
+  }
+
+  updateLimitMetrics() {
     const badge = document.getElementById('sliderMetricBadge');
-    if (!slider || !badge) return;
+    if (!badge) return;
 
-    const val = parseInt(slider.value);
-    this.selectedLimit = String(val);
-    const estQ = val * 3;
-    const estMin = Math.round(estQ * 2.5);
+    if (this.selectedLimit === 'all') {
+      badge.innerHTML = `🏆 <strong>선택 연도 전체</strong> (전범위 완벽 대비)`;
+    } else {
+      const val = parseInt(this.selectedLimit) || 5;
+      const estQ = val * 3;
+      const estMin = Math.round(estQ * 2.5);
+      badge.innerHTML = `⚡ <strong>${val}세트</strong> (약 ${estQ}문항 · 예상 ${estMin}분)`;
+    }
+  }
 
-    badge.innerHTML = `⚡ <strong>${val}세트</strong> (약 ${estQ}문항 · 예상 ${estMin}분)`;
+  // --- SUBJECT & TARGET & MODE SELECTION ---
+  selectSubject(sub) {
+    this.selectedSubject = sub;
+    document.querySelectorAll('#homeSubjectCards .setup-card').forEach(c => {
+      const isMatch = c.dataset.val === this.selectedSubject;
+      c.classList.toggle('selected', isMatch);
+      c.classList.toggle('border-indigo-500', isMatch);
+      c.classList.toggle('border-slate-700', !isMatch);
+    });
+    this.saveToStorage();
+  }
+
+  selectTarget(target) {
+    this.targetFilter = target;
+    document.querySelectorAll('#homeTargetFilterChips .target-chip').forEach(c => {
+      const isMatch = c.dataset.target === this.targetFilter;
+      c.classList.toggle('selected', isMatch);
+      c.classList.toggle('bg-indigo-600', isMatch);
+      c.classList.toggle('text-white', isMatch);
+      c.classList.toggle('border-indigo-500', isMatch);
+      c.classList.toggle('bg-slate-800', !isMatch);
+    });
+    this.saveToStorage();
+  }
+
+  selectMode(mode) {
+    this.examMode = mode;
+    document.querySelectorAll('#homeExamModeCards .mode-card').forEach(c => {
+      const isMatch = c.dataset.mode === this.examMode;
+      c.classList.toggle('selected', isMatch);
+      c.classList.toggle('border-indigo-500', isMatch);
+      c.classList.toggle('border-slate-700', !isMatch);
+    });
+    this.saveToStorage();
   }
 
   showView(viewName) {
@@ -272,48 +362,18 @@ class LeetApp {
   }
 
   syncSavedSettingsToUI() {
-    // Subject Cards
-    document.querySelectorAll('#homeSubjectCards .setup-card').forEach(c => {
-      const isMatch = c.dataset.val === this.selectedSubject;
-      c.classList.toggle('selected', isMatch);
-      c.classList.toggle('border-indigo-500', isMatch);
-      c.classList.toggle('border-slate-700', !isMatch);
-    });
+    this.selectSubject(this.selectedSubject);
+    this.selectLimit(this.selectedLimit);
+    this.selectTarget(this.targetFilter);
+    this.selectMode(this.examMode);
 
-    // Target Filter Chips
-    document.querySelectorAll('#homeTargetFilterChips .target-chip').forEach(c => {
-      const isMatch = c.dataset.target === this.targetFilter;
-      c.classList.toggle('selected', isMatch);
-      c.classList.toggle('bg-indigo-600', isMatch);
-      c.classList.toggle('text-white', isMatch);
-      c.classList.toggle('border-indigo-500', isMatch);
-      c.classList.toggle('bg-slate-800', !isMatch);
-    });
-
-    // Exam Mode Cards
-    document.querySelectorAll('#homeExamModeCards .mode-card').forEach(c => {
-      const isMatch = c.dataset.mode === this.examMode;
-      c.classList.toggle('selected', isMatch);
-      c.classList.toggle('border-indigo-500', isMatch);
-      c.classList.toggle('border-slate-700', !isMatch);
-    });
-
-    // Limit Slider
-    const slider = document.getElementById('homeLimitSlider');
-    if (slider) {
-      if (this.selectedLimit === 'all') slider.value = 30;
-      else slider.value = parseInt(this.selectedLimit) || 5;
-    }
-    this.updateSliderMetrics();
-
-    // Shuffle Checkbox
     const homeShuffle = document.getElementById('homeShuffleCheckbox');
     if (homeShuffle) homeShuffle.checked = this.isShuffled;
 
     this.setFontSize(this.fontSize);
   }
 
-  // --- FILTER & JUMP ENGINE ---
+  // --- FILTER ENGINE ---
   applyFilters() {
     let list = [...this.rawSets];
     
@@ -371,7 +431,6 @@ class LeetApp {
   }
 
   // --- QUICK SEARCH & SHORTCUT JUMP ENGINE ---
-  // Matches: 26추11, 26추리11, 2026 추리 11, 24언3, 24언어3, etc.
   handleQuickSearch(query) {
     if (!query || !query.trim()) return;
     const q = query.trim().replace(/\s+/g, '');
@@ -425,7 +484,6 @@ class LeetApp {
       return;
     }
 
-    // Switch view and set filteredSets to encompass target
     this.selectedSubject = subject;
     this.selectedYears = [String(year)];
     this.selectedLimit = 'all';
@@ -433,7 +491,6 @@ class LeetApp {
 
     this.showView('exam');
     
-    // Find the index in filteredSets
     const newIdx = this.filteredSets.findIndex(s => 
       String(s.year) === String(year) && 
       s.subject === subject && 
@@ -454,7 +511,7 @@ class LeetApp {
     if (!dropdown) return;
 
     if (results.length === 0) {
-      dropdown.innerHTML = '<div class="p-3 text-xs text-slate-400 text-center">검색 결과가 없습니다.</div>';
+      dropdown.innerHTML = '<div class="p-3 text-xs text-slate-400 text-center">일치하는 문항이 없습니다.</div>';
       dropdown.classList.remove('hidden');
       return;
     }
@@ -887,7 +944,7 @@ class LeetApp {
     container.innerHTML = html;
   }
 
-  // --- FULL EXAM PAPER CONTINUOUS MODE (PDF REAL EXAM STYLE) ---
+  // --- FULL EXAM PAPER CONTINUOUS MODE ---
   renderFullPaperMode() {
     const passagePane = document.getElementById('passagePane');
     const questionsPane = document.getElementById('questionsPane');
@@ -948,8 +1005,6 @@ class LeetApp {
       totalSets.forEach((set) => {
         set.questions.forEach((q) => {
           const userAns = this.userAnswers[q.id];
-          const isChecked = this.isExamSubmitted;
-          const isCorrect = isChecked && userAns === q.answer;
           const memoText = this.userMemos[q.id] || '';
           const isBookmarked = !!this.bookmarks[q.id];
 
@@ -993,7 +1048,7 @@ class LeetApp {
                 <textarea 
                   rows="2" 
                   placeholder="메모 작성..." 
-                  class="w-full text-xs p-2 bg-white border border-amber-300 rounded-lg"
+                  class="w-full text-xs p-2 bg-white border border-amber-300 rounded-lg font-sans"
                   oninput="app.saveMemo('${q.id}', this.value)"
                 >${memoText}</textarea>
               </div>
@@ -1280,7 +1335,7 @@ class LeetApp {
   }
 
   renderOMR() {
-    const grid = document.getElementById('omrGrid');
+    const grid = document.getElementById('omrGridContainer') || document.getElementById('omrGrid');
     if (!grid) return;
 
     let html = '';
@@ -1350,31 +1405,33 @@ class LeetApp {
     }
     this.updateHomeDashboard();
 
-    const modal = document.getElementById('examResultModal');
-    const scoreVal = document.getElementById('resultScoreValue');
-    const resultCount = document.getElementById('resultCorrectCount');
-    const wrongCount = document.getElementById('resultWrongCount');
+    const modal = document.getElementById('resultReportModal') || document.getElementById('examResultModal');
+    const totalScoreEl = document.getElementById('resultTotalScore');
+    const accuracyRateEl = document.getElementById('resultAccuracyRate');
+    const answeredCountEl = document.getElementById('resultAnsweredCount');
 
     let totalQ = 0;
     let correctQ = 0;
+    let answeredQ = 0;
     this.filteredSets.forEach(s => {
       s.questions.forEach(q => {
         totalQ++;
+        if (this.userAnswers[q.id] !== undefined) answeredQ++;
         if (this.userAnswers[q.id] === q.answer) correctQ++;
       });
     });
 
     const scorePct = totalQ > 0 ? Math.round((correctQ / totalQ) * 100) : 0;
-    if (scoreVal) scoreVal.textContent = `${scorePct}점`;
-    if (resultCount) resultCount.textContent = `${correctQ} / ${totalQ} 문항`;
-    if (wrongCount) wrongCount.textContent = `${totalQ - correctQ} 문항`;
+    if (totalScoreEl) totalScoreEl.textContent = `${correctQ} / ${totalQ}`;
+    if (accuracyRateEl) accuracyRateEl.textContent = `${scorePct}%`;
+    if (answeredCountEl) answeredCountEl.textContent = `${answeredQ}개 풀이 (${totalQ - answeredQ}개 미응답)`;
 
     if (modal) modal.classList.remove('hidden');
   }
 
   // --- EVENT BINDINGS ---
   bindEvents() {
-    // Quick Search Input Bindings (Home & Mobile)
+    // Quick Search Input Bindings
     const homeSearch = document.getElementById('homeHeaderSearchInput');
     const mobileSearch = document.getElementById('homeMobileSearchInput');
     
@@ -1398,96 +1455,6 @@ class LeetApp {
         dropdown.classList.add('hidden');
       }
     });
-
-    // Subject Cards
-    document.querySelectorAll('#homeSubjectCards .setup-card').forEach(card => {
-      card.addEventListener('click', () => {
-        this.selectedSubject = card.dataset.val;
-        this.syncSavedSettingsToUI();
-      });
-    });
-
-    // Target Filter Chips
-    document.querySelectorAll('#homeTargetFilterChips .target-chip').forEach(chip => {
-      chip.addEventListener('click', () => {
-        this.targetFilter = chip.dataset.target;
-        this.syncSavedSettingsToUI();
-      });
-    });
-
-    // Exam Mode Cards
-    document.querySelectorAll('#homeExamModeCards .mode-card').forEach(card => {
-      card.addEventListener('click', () => {
-        this.examMode = card.dataset.mode;
-        this.syncSavedSettingsToUI();
-      });
-    });
-
-    // Multi-Year Chip Toggles
-    const yearContainer = document.getElementById('homeMultiYearChips');
-    if (yearContainer) {
-      yearContainer.addEventListener('click', (e) => {
-        const btn = e.target.closest('.multi-year-chip');
-        if (!btn) return;
-        const yr = btn.dataset.year;
-        if (this.selectedYears.includes(yr)) {
-          this.selectedYears = this.selectedYears.filter(y => y !== yr);
-        } else {
-          this.selectedYears.push(yr);
-          this.selectedYears.sort((a, b) => parseInt(b) - parseInt(a));
-        }
-        this.renderHomeMultiYearChips();
-      });
-    }
-
-    // Multi-Year Presets
-    const presetAll = document.getElementById('presetAllYearsBtn');
-    if (presetAll) {
-      presetAll.addEventListener('click', () => {
-        this.selectedYears = Array.from({length: 18}, (_, i) => String(2026 - i));
-        this.renderHomeMultiYearChips();
-      });
-    }
-
-    const presetRecent3 = document.getElementById('presetRecent3Btn');
-    if (presetRecent3) {
-      presetRecent3.addEventListener('click', () => {
-        this.selectedYears = ['2026', '2025', '2024'];
-        this.renderHomeMultiYearChips();
-      });
-    }
-
-    const presetRecent5 = document.getElementById('presetRecent5Btn');
-    if (presetRecent5) {
-      presetRecent5.addEventListener('click', () => {
-        this.selectedYears = ['2026', '2025', '2024', '2023', '2022'];
-        this.renderHomeMultiYearChips();
-      });
-    }
-
-    const presetClear = document.getElementById('presetClearYearsBtn');
-    if (presetClear) {
-      presetClear.addEventListener('click', () => {
-        this.selectedYears = [];
-        this.renderHomeMultiYearChips();
-      });
-    }
-
-    // Range Slider
-    const slider = document.getElementById('homeLimitSlider');
-    if (slider) {
-      slider.addEventListener('input', () => this.updateSliderMetrics());
-    }
-
-    const sliderMaxBtn = document.getElementById('sliderMaxBtn');
-    if (sliderMaxBtn && slider) {
-      sliderMaxBtn.addEventListener('click', () => {
-        slider.value = 30;
-        this.selectedLimit = 'all';
-        const badge = document.getElementById('sliderMetricBadge');
-        if (badge) badge.innerHTML = `🏆 <strong>선택 연도 전체</strong> 풀이`;
-      });
-    }
 
     // Start Button
     const startBtn = document.getElementById('homeStartBtn');
@@ -1561,32 +1528,6 @@ class LeetApp {
       });
     }
 
-    // Bookmark Subject Filters
-    const bmAll = document.getElementById('bookmarkFilterSubjectAll');
-    const bmLang = document.getElementById('bookmarkFilterSubjectLang');
-    const bmReason = document.getElementById('bookmarkFilterSubjectReason');
-
-    if (bmAll && bmLang && bmReason) {
-      bmAll.addEventListener('click', () => {
-        bmAll.className = 'px-2.5 py-1 rounded-lg bg-amber-500 text-white font-bold transition';
-        bmLang.className = 'px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 transition';
-        bmReason.className = 'px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 transition';
-        this.renderBookmarksList('all');
-      });
-      bmLang.addEventListener('click', () => {
-        bmLang.className = 'px-2.5 py-1 rounded-lg bg-amber-500 text-white font-bold transition';
-        bmAll.className = 'px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 transition';
-        bmReason.className = 'px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 transition';
-        this.renderBookmarksList('언어이해');
-      });
-      bmReason.addEventListener('click', () => {
-        bmReason.className = 'px-2.5 py-1 rounded-lg bg-amber-500 text-white font-bold transition';
-        bmAll.className = 'px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 transition';
-        bmLang.className = 'px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 transition';
-        this.renderBookmarksList('추리논증');
-      });
-    }
-
     // Wrong Notes Modal Listeners
     const openWrongBtn = document.getElementById('homeOpenWrongNotesBtn');
     const closeWrongBtn = document.getElementById('closeWrongNotesBtn');
@@ -1606,35 +1547,9 @@ class LeetApp {
       });
     }
 
-    // Wrong Notes Subject Filters
-    const wrongAll = document.getElementById('wrongFilterSubjectAll');
-    const wrongLang = document.getElementById('wrongFilterSubjectLang');
-    const wrongReason = document.getElementById('wrongFilterSubjectReason');
-
-    if (wrongAll && wrongLang && wrongReason) {
-      wrongAll.addEventListener('click', () => {
-        wrongAll.className = 'px-2.5 py-1 rounded-lg bg-indigo-600 text-white font-bold transition';
-        wrongLang.className = 'px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 transition';
-        wrongReason.className = 'px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 transition';
-        this.renderWrongNotesList('all');
-      });
-      wrongLang.addEventListener('click', () => {
-        wrongLang.className = 'px-2.5 py-1 rounded-lg bg-indigo-600 text-white font-bold transition';
-        wrongAll.className = 'px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 transition';
-        wrongReason.className = 'px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 transition';
-        this.renderWrongNotesList('언어이해');
-      });
-      wrongReason.addEventListener('click', () => {
-        wrongReason.className = 'px-2.5 py-1 rounded-lg bg-indigo-600 text-white font-bold transition';
-        wrongAll.className = 'px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 transition';
-        wrongLang.className = 'px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 transition';
-        this.renderWrongNotesList('추리논증');
-      });
-    }
-
     // Result Modal
     const closeResultBtn = document.getElementById('closeResultModalBtn');
-    const resultModal = document.getElementById('examResultModal');
+    const resultModal = document.getElementById('resultReportModal') || document.getElementById('examResultModal');
     if (closeResultBtn && resultModal) {
       closeResultBtn.addEventListener('click', () => resultModal.classList.add('hidden'));
     }
