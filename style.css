@@ -72,15 +72,46 @@ mark.hl-green { background-color: #bbf7d0; padding: 1px 3px; border-radius: 3px;
 mark.hl-pink { background-color: #fbcfe8; padding: 1px 3px; border-radius: 3px; }
 mark.hl-blue { background-color: #bae6fd; padding: 1px 3px; border-radius: 3px; }
 
-/* Draggable resizer */
+/* Draggable resizer with elegant center grip handle */
 .resizer-bar {
   cursor: col-resize;
   background-color: #e2e8f0;
   transition: background-color 0.15s ease;
-  z-index: 10;
+  z-index: 20;
+  position: relative;
+}
+.resizer-bar::after {
+  content: "⋮";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 16px;
+  color: #94a3b8;
+  pointer-events: none;
+  font-weight: bold;
 }
 .resizer-bar:hover, .resizer-bar.dragging {
   background-color: #6366f1;
+}
+.resizer-bar:hover::after, .resizer-bar.dragging::after {
+  color: #ffffff;
+}
+
+/* Keyboard hint badge */
+.kbd-hint {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1px 5px;
+  font-size: 10px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-weight: 700;
+  color: #64748b;
+  background-color: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
 }
 
 /* Interactive Option Items */

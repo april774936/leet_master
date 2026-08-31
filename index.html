@@ -342,9 +342,9 @@
           <span id="timerDisplay" class="font-mono font-bold text-slate-900">00:00</span>
         </button>
 
-        <!-- Quick Settings Button (For Mobile) -->
-        <button id="mobileSettingsBtn" class="md:hidden p-1.5 rounded-lg bg-slate-100 text-slate-700 border border-slate-300 text-xs font-bold transition flex items-center" title="학습 설정">
-          ⚙️
+        <!-- Keyboard Shortcuts Button (PC Only) -->
+        <button id="shortcutsGuideBtn" class="hidden md:flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold border border-slate-300 transition shadow-sm" title="키보드 단축키 안내">
+          ⌨️ <span class="text-[11px]">단축키</span>
         </button>
 
         <!-- OMR Drawer Button -->
@@ -629,6 +629,62 @@
 
       <button id="closeMobileGuideBtn2" class="w-full py-3.5 rounded-2xl bg-slate-900 text-white font-bold text-xs shadow transition">
         확인했습니다
+      </button>
+    </div>
+  </div>
+
+  <!-- PC Keyboard Shortcuts Modal -->
+  <div id="shortcutsModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-5">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div class="flex items-center gap-2">
+          <span class="text-2xl">⌨️</span>
+          <h3 class="text-lg font-black text-slate-900">PC 키보드 단축키 안내</h3>
+        </div>
+        <button id="closeShortcutsModalBtn" class="text-slate-400 hover:text-slate-600 font-bold text-lg">✕</button>
+      </div>
+
+      <div class="space-y-3 text-xs text-slate-700">
+        <div class="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-200">
+          <span class="font-medium">선택지 1~5번 즉시 마킹</span>
+          <div class="flex gap-1">
+            <span class="kbd-hint">1</span>
+            <span class="kbd-hint">2</span>
+            <span class="kbd-hint">3</span>
+            <span class="kbd-hint">4</span>
+            <span class="kbd-hint">5</span>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-200">
+          <span class="font-medium">이전 세트 / 다음 세트 이동</span>
+          <div class="flex gap-1">
+            <span class="kbd-hint">←</span>
+            <span class="kbd-hint">→</span>
+            <span class="text-slate-400">또는</span>
+            <span class="kbd-hint">[</span>
+            <span class="kbd-hint">]</span>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-200">
+          <span class="font-medium">세트 내 다음 문제로 이동</span>
+          <span class="kbd-hint">Tab</span>
+        </div>
+
+        <div class="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-200">
+          <span class="font-medium">정답 및 즉시 채점 / 해설 토글</span>
+          <span class="kbd-hint">Space</span>
+        </div>
+
+        <div class="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-200">
+          <span class="font-medium">전체 OMR 답안지 열기 / 닫기</span>
+          <span class="kbd-hint">O</span>
+        </div>
+      </div>
+
+      <button id="closeShortcutsModalBtn2" class="w-full py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow transition">
+        확인 (닫기)
       </button>
     </div>
   </div>

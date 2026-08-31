@@ -651,6 +651,87 @@ class LeetApp {
       document.addEventListener('mouseup', onMouseUp);
     }
 
+    // --- GLOBAL KEYBOARD SHORTCUTS (PC ENHANCEMENT) ---
+    document.addEventListener('keydown', (e) => {
+      // Ignore when typing in input or select
+      if (['INPUT', 'SELECT', 'TEXTAREA'].includes(e.target.tagName)) return;
+      if (this.currentView !== 'exam') return;
+
+      const set = this.filteredSets[this.currentSetIndex];
+      if (!set || !set.questions.length) return;
+
+      const activeQ = set.questions[this.activeQuestionIndex] || set.questions[0];
+
+      // Number keys 1-5: Select answer option
+      if (['1', '2', '3', '4', '5'].includes(e.key)) {
+        e.preventDefault();
+        const choice = parseInt(e.key);
+        this.selectAnswer(activeQ.id, choice);
+      }
+      // Arrow keys / Bracket keys: Prev/Next Set
+      else if (e.key === 'ArrowLeft' || e.key === '[') {
+        e.preventDefault();
+        this.prevSet();
+      }
+      else if (e.key === 'ArrowRight' || e.key === ']') {
+        e.preventDefault();
+        this.nextSet();
+      }
+      // Space: Check answer for current set
+      else if (e.key === ' ' || e.key === 'Spacebar') {
+        e.preventDefault();
+        this.checkCurrentSet();
+      }
+      // 'O' key: Toggle OMR Modal
+      else if (e.key.toLowerCase() === 'o') {
+        e.preventDefault();
+        const omrModal = document.getElementById('omrDrawerModal');
+        if (omrModal) {
+          const isHidden = omrModal.classList.contains('hidden');
+          omrModal.classList.toggle('hidden', !isHidden);
+        }
+      }
+      // 'Tab' key: Cycle through questions in multi-question set
+      else if (e.key === 'Tab' && set.questions.length > 1) {
+        e.preventDefault();
+        const nextIdx = (this.activeQuestionIndex + 1) % set.questions.length;
+        this.scrollToQuestion(nextIdx);
+      }
+    });
+
+    // --- MOBILE SWIPE GESTURE SUPPORT (MOBILE ENHANCEMENT) ---
+    let touchStartX = 0;
+    let touchStartY = 0;
+    const splitPane = document.getElementById('mainSplitPane');
+
+    if (splitPane) {
+      splitPane.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+        touchStartY = e.changedTouches[0].screenY;
+      }, { passive: true });
+
+      splitPane.addEventListener('touchend', (e) => {
+        if (window.innerWidth >= 1024) return; // Only for mobile/tablet
+        const touchEndX = e.changedTouches[0].screenX;
+        const touchEndY = e.changedTouches[0].screenY;
+        const diffX = touchEndX - touchStartX;
+        const diffY = touchEndY - touchStartY;
+
+        // Horizontal swipe detected (threshold: 60px horizontal, less than 50px vertical)
+        if (Math.abs(diffX) > 60 && Math.abs(diffY) < 50) {
+          if (diffX < 0 && this.mobileTab === 'passage') {
+            // Swipe Left -> Go to Questions
+            this.setMobileTab('questions');
+            if (navigator.vibrate) navigator.vibrate(10);
+          } else if (diffX > 0 && this.mobileTab === 'questions') {
+            // Swipe Right -> Go to Passage
+            this.setMobileTab('passage');
+            if (navigator.vibrate) navigator.vibrate(10);
+          }
+        }
+      }, { passive: true });
+    }
+
     // Highlight text selection
     const passageContainer = document.getElementById('passageBody');
     if (passageContainer) {
@@ -743,6 +824,28 @@ class LeetApp {
 
     if (resetAnswersBtn) resetAnswersBtn.addEventListener('click', onResetAll);
     if (homeResetAllBtn) homeResetAllBtn.addEventListener('click', onResetAll);
+
+    // Shortcuts Guide Modal Listeners
+    const shortcutsBtn = document.getElementById('shortcutsGuideBtn');
+    const shortcutsModal = document.getElementById('shortcutsModal');
+    const closeShortcutsBtn = document.getElementById('closeShortcutsModalBtn');
+    const closeShortcutsBtn2 = document.getElementById('closeShortcutsModalBtn2');
+
+    if (shortcutsBtn && shortcutsModal) {
+      shortcutsBtn.addEventListener('click', () => {
+        shortcutsModal.classList.remove('hidden');
+      });
+    }
+    if (closeShortcutsBtn && shortcutsModal) {
+      closeShortcutsBtn.addEventListener('click', () => {
+        shortcutsModal.classList.add('hidden');
+      });
+    }
+    if (closeShortcutsBtn2 && shortcutsModal) {
+      closeShortcutsBtn2.addEventListener('click', () => {
+        shortcutsModal.classList.add('hidden');
+      });
+    }
   }
 
   togglePassageSide() {
