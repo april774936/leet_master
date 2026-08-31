@@ -248,8 +248,20 @@
 
         <!-- START BUTTON (BIG CTA) -->
         <div class="pt-2">
-          <button onclick="app.showView('exam')" id="homeStartBtn" class="w-full py-4 rounded-2xl bg-indigo-600 hover:bg-indigo-500 active:scale-[0.99] text-white text-base sm:text-lg font-black shadow-xl shadow-indigo-600/30 transition flex items-center justify-center gap-2">
+          <button onclick="app.startTraining()" id="homeStartBtn" class="w-full py-4 rounded-2xl bg-indigo-600 hover:bg-indigo-500 active:scale-[0.99] text-white text-base sm:text-lg font-black shadow-xl shadow-indigo-600/30 transition flex items-center justify-center gap-2 cursor-pointer">
             <span>🚀 LEET 실전 트레이닝 시작하기</span>
+          </button>
+        </div>
+
+        <!-- Live Version Badge & Quick Cache Reset -->
+        <div class="pt-3 border-t border-slate-700/80 flex items-center justify-between text-[11px] text-slate-400">
+          <span class="flex items-center gap-1.5 font-mono">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse inline-block"></span>
+            <span class="text-emerald-400 font-bold">LIVE v3.4.1</span>
+            <span>(2026.08.31 최신 배포)</span>
+          </span>
+          <button onclick="location.href=location.pathname+'?v=' + Date.now()" class="px-2.5 py-1 rounded-lg bg-slate-700 hover:bg-slate-600 text-indigo-300 font-bold transition flex items-center gap-1 cursor-pointer">
+            🔄 <span>최신 버전 즉시 동기화</span>
           </button>
         </div>
 
@@ -258,7 +270,7 @@
       <!-- Quick Actions Bar -->
       <div class="mt-6 flex flex-wrap items-center justify-between text-xs text-slate-400 gap-3 px-2">
         <span>💾 모든 풀이 데이터는 브라우저에 자동 저장됩니다.</span>
-        <button id="homeResetAllBtn" class="hover:text-rose-400 underline transition">전체 풀이 기록 초기화</button>
+        <button id="homeResetAllBtn" class="hover:text-rose-400 underline transition cursor-pointer">전체 풀이 기록 초기화</button>
       </div>
 
     </main>
