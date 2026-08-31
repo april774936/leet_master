@@ -624,6 +624,48 @@ class LeetApp {
     }
   }
 
+
+  goHomeAndSave() {
+    let anySaved = false;
+    if (this.filteredSets && this.filteredSets.length > 0) {
+      this.filteredSets.forEach(set => {
+        let setHasAnswers = false;
+        set.questions.forEach(q => {
+          const userAns = this.userAnswers[q.id];
+          if (userAns !== undefined) {
+            setHasAnswers = true;
+            if (userAns !== q.answer) {
+              this.wrongHistory[q.id] = {
+                qId: q.id,
+                setId: set.id,
+                year: set.year,
+                subject: set.subject,
+                qNum: q.qNum,
+                userAns: userAns,
+                correctAns: q.answer,
+                timestamp: Date.now()
+              };
+            } else if (this.wrongHistory[q.id]) {
+              delete this.wrongHistory[q.id];
+            }
+          }
+        });
+        if (setHasAnswers) {
+          this.checkedSets[set.id] = true;
+          anySaved = true;
+        }
+      });
+      this.saveToStorage();
+    }
+    
+    if (anySaved) {
+      // Optional: alert('지금까지 푼 문제들의 채점 및 기록이 자동 저장되었습니다.');
+    }
+    
+    this.showView('home');
+    this.updateHomeDashboard();
+  }
+
   nextSet() {
     if (this.currentSetIndex < this.filteredSets.length - 1) {
       this.currentSetIndex++;
