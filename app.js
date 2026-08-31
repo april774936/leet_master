@@ -150,14 +150,8 @@ class LeetApp {
     const questionsPane = document.getElementById('questionsPane');
 
     if (tab === 'passage') {
-      if (passageBtn) {
-        passageBtn.classList.replace('bg-slate-100', 'bg-indigo-600');
-        passageBtn.classList.replace('text-slate-700', 'text-white');
-      }
-      if (questionsBtn) {
-        questionsBtn.classList.replace('bg-indigo-600', 'bg-slate-100');
-        questionsBtn.classList.replace('text-white', 'text-slate-700');
-      }
+      if (passageBtn) passageBtn.classList.add('active');
+      if (questionsBtn) questionsBtn.classList.remove('active');
       if (passagePane) {
         passagePane.classList.remove('mobile-pane-hidden');
         passagePane.classList.add('mobile-pane-visible');
@@ -167,14 +161,8 @@ class LeetApp {
         questionsPane.classList.add('mobile-pane-hidden');
       }
     } else {
-      if (questionsBtn) {
-        questionsBtn.classList.replace('bg-slate-100', 'bg-indigo-600');
-        questionsBtn.classList.replace('text-slate-700', 'text-white');
-      }
-      if (passageBtn) {
-        passageBtn.classList.replace('bg-indigo-600', 'bg-slate-100');
-        passageBtn.classList.replace('text-white', 'text-slate-700');
-      }
+      if (questionsBtn) questionsBtn.classList.add('active');
+      if (passageBtn) passageBtn.classList.remove('active');
       if (questionsPane) {
         questionsPane.classList.remove('mobile-pane-hidden');
         questionsPane.classList.add('mobile-pane-visible');
@@ -227,6 +215,18 @@ class LeetApp {
       b.classList.toggle('text-slate-700', !isMatch);
     });
 
+    // Sync Mobile Subject buttons
+    document.querySelectorAll('.mobile-filter-subject-btn').forEach(b => {
+      const isMatch = b.dataset.subject === this.selectedSubject;
+      b.classList.toggle('bg-indigo-50', isMatch);
+      b.classList.toggle('border-indigo-600', isMatch);
+      b.classList.toggle('text-indigo-700', isMatch);
+      b.classList.toggle('font-bold', isMatch);
+      b.classList.toggle('bg-slate-50', !isMatch);
+      b.classList.toggle('border-slate-200', !isMatch);
+      b.classList.toggle('text-slate-700', !isMatch);
+    });
+
     // Sync Home Subject Cards
     document.querySelectorAll('#homeSubjectCards .setup-card').forEach(c => {
       const isMatch = c.dataset.val === this.selectedSubject;
@@ -260,6 +260,29 @@ class LeetApp {
 
     const limitSelect = document.getElementById('limitFilterSelect');
     if (limitSelect) limitSelect.value = this.selectedLimit;
+
+    const mobileYear = document.getElementById('mobileYearSelect');
+    if (mobileYear) mobileYear.value = this.selectedYear;
+
+    const mobileLimit = document.getElementById('mobileLimitSelect');
+    if (mobileLimit) mobileLimit.value = this.selectedLimit;
+
+    const mobileShuffle = document.getElementById('mobileShuffleCheck');
+    if (mobileShuffle) mobileShuffle.checked = this.isShuffled;
+
+    const mobileWrong = document.getElementById('mobileWrongCheck');
+    if (mobileWrong) mobileWrong.checked = this.onlyWrongMode;
+
+    document.querySelectorAll('.mobile-font-btn').forEach(b => {
+      const isMatch = b.dataset.size === this.fontSize;
+      b.classList.toggle('bg-indigo-50', isMatch);
+      b.classList.toggle('border-indigo-600', isMatch);
+      b.classList.toggle('text-indigo-700', isMatch);
+      b.classList.toggle('font-bold', isMatch);
+      b.classList.toggle('bg-slate-50', !isMatch);
+      b.classList.toggle('border-slate-200', !isMatch);
+      b.classList.toggle('text-slate-700', !isMatch);
+    });
 
     this.setFontSize(this.fontSize);
   }
@@ -461,6 +484,56 @@ class LeetApp {
     }
     if (mobileTabQuestions) {
       mobileTabQuestions.addEventListener('click', () => this.setMobileTab('questions'));
+    }
+
+    // Mobile Settings Modal
+    const mobileSettingsBtn = document.getElementById('mobileSettingsBtn');
+    const mobileSettingsModal = document.getElementById('mobileSettingsModal');
+    const closeMobileSettingsBtn = document.getElementById('closeMobileSettingsBtn');
+    const applyMobileSettingsBtn = document.getElementById('applyMobileSettingsBtn');
+
+    if (mobileSettingsBtn && mobileSettingsModal) {
+      mobileSettingsBtn.addEventListener('click', () => {
+        this.syncSavedSettingsToUI();
+        mobileSettingsModal.classList.remove('hidden');
+      });
+    }
+    if (closeMobileSettingsBtn && mobileSettingsModal) {
+      closeMobileSettingsBtn.addEventListener('click', () => {
+        mobileSettingsModal.classList.add('hidden');
+      });
+    }
+
+    document.querySelectorAll('.mobile-filter-subject-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        this.selectedSubject = btn.dataset.subject;
+        this.syncSavedSettingsToUI();
+      });
+    });
+
+    document.querySelectorAll('.mobile-font-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        this.fontSize = btn.dataset.size;
+        this.syncSavedSettingsToUI();
+      });
+    });
+
+    if (applyMobileSettingsBtn && mobileSettingsModal) {
+      applyMobileSettingsBtn.addEventListener('click', () => {
+        const mobileYear = document.getElementById('mobileYearSelect');
+        const mobileLimit = document.getElementById('mobileLimitSelect');
+        const mobileShuffle = document.getElementById('mobileShuffleCheck');
+        const mobileWrong = document.getElementById('mobileWrongCheck');
+
+        if (mobileYear) this.selectedYear = mobileYear.value;
+        if (mobileLimit) this.selectedLimit = mobileLimit.value;
+        if (mobileShuffle) this.isShuffled = mobileShuffle.checked;
+        if (mobileWrong) this.onlyWrongMode = mobileWrong.checked;
+
+        this.syncSavedSettingsToUI();
+        this.applyFilters();
+        mobileSettingsModal.classList.add('hidden');
+      });
     }
 
     // 2. EXAM HEADER CONTROLS
@@ -805,6 +878,11 @@ class LeetApp {
       indicator.textContent = `세트 ${this.currentSetIndex + 1} / ${this.filteredSets.length}`;
     }
 
+    const headerTitle = document.getElementById('examHeaderTitle');
+    if (headerTitle) {
+      headerTitle.textContent = `${set.year} ${set.subject} · 세트 ${this.currentSetIndex + 1}/${this.filteredSets.length}`;
+    }
+
     const prevBtn = document.getElementById('prevSetBtn');
     const nextBtn = document.getElementById('nextSetBtn');
     if (prevBtn) prevBtn.disabled = this.currentSetIndex === 0;
@@ -944,6 +1022,15 @@ class LeetApp {
 
     tabsHTML += '</div>';
     tabsContainer.innerHTML = tabsHTML;
+
+    const mobileQBadge = document.getElementById('mobileQBadge');
+    if (mobileQBadge) {
+      let answered = 0;
+      set.questions.forEach(q => {
+        if (this.userAnswers[q.id] !== undefined) answered++;
+      });
+      mobileQBadge.textContent = `${answered}/${set.questions.length}`;
+    }
   }
 
   renderQuestions(set) {
@@ -1110,6 +1197,8 @@ class LeetApp {
   selectOption(qId, optNum) {
     const currentSet = this.filteredSets[this.currentSetIndex];
     if (this.checkedSets[currentSet.id] || this.isExamSubmitted) return;
+    
+    try { if (navigator.vibrate) navigator.vibrate(10); } catch(e) {}
     
     if (this.userAnswers[qId] === optNum) {
       delete this.userAnswers[qId];

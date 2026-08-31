@@ -115,7 +115,101 @@ mark.hl-blue { background-color: #bae6fd; padding: 1px 3px; border-radius: 3px; 
   box-shadow: 0 2px 8px rgba(79, 70, 229, 0.25);
 }
 
-/* Mobile Responsiveness */
+/* Mobile Responsiveness & Touch Enhancements */
+html, body {
+  -webkit-text-size-adjust: 100%;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Safe Area Inset Support */
+.safe-pb {
+  padding-bottom: max(16px, env(safe-area-inset-bottom));
+}
+
+.safe-pt {
+  padding-top: max(12px, env(safe-area-inset-top));
+}
+
+/* Mobile Floating Bottom Bar */
+.mobile-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid #e2e8f0;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
+  z-index: 30;
+  padding-bottom: max(10px, env(safe-area-inset-bottom));
+}
+
+/* Mobile Quick Tabs Switcher */
+.mobile-segmented-control {
+  background-color: #f1f5f9;
+  border-radius: 9999px;
+  padding: 3px;
+  display: flex;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+.mobile-segmented-control button {
+  flex: 1;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 700;
+  border-radius: 9999px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  text-align: center;
+}
+
+.mobile-segmented-control button.active {
+  background-color: #4f46e5;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
+}
+
+.mobile-segmented-control button:not(.active) {
+  color: #64748b;
+}
+
+/* Touch Friendly Option Cards */
+.option-item {
+  transition: all 0.15s ease-in-out;
+  user-select: none;
+  min-height: 52px;
+  touch-action: manipulation;
+  cursor: pointer;
+}
+
+.option-item:active {
+  transform: scale(0.985);
+}
+
+.option-circle {
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 13px;
+  transition: all 0.15s ease;
+}
+
+/* Mobile Scroll Containers */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 @media (max-width: 768px) {
   .desktop-resizer {
     display: none !important;
@@ -133,5 +227,20 @@ mark.hl-blue { background-color: #bae6fd; padding: 1px 3px; border-radius: 3px; 
     display: flex !important;
     width: 100% !important;
     max-width: 100% !important;
+  }
+
+  /* Compact Modal on Mobile */
+  .mobile-sheet-modal {
+    align-items: flex-end !important;
+    padding: 0 !important;
+  }
+
+  .mobile-sheet-modal > div {
+    max-height: 92vh !important;
+    border-bottom-left-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+    border-top-left-radius: 1.5rem !important;
+    border-top-right-radius: 1.5rem !important;
+    padding-bottom: max(16px, env(safe-area-inset-bottom)) !important;
   }
 }
