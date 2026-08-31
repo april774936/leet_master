@@ -1,5 +1,29 @@
 @charset "UTF-8";
 
+/* =================================================== */
+/* 0. CRITICAL DISPLAY & MODAL OVERLAY FIX             */
+/* =================================================== */
+.hidden, [hidden] {
+  display: none !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+}
+
+#homeSearchResultsDropdown.hidden,
+#omrDrawerModal.hidden,
+#resultReportModal.hidden,
+#mobileSettingsModal.hidden,
+#mobileGuideModal.hidden,
+#shortcutsModal.hidden,
+#wrongNotesModal.hidden,
+#bookmarksModal.hidden,
+#examView.hidden,
+#homeView.hidden {
+  display: none !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+}
+
 /* Typography */
 body, button, input, select, textarea {
   font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;

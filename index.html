@@ -21,7 +21,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&family=Noto+Serif+KR:wght@400;500;600;700;900&display=swap" rel="stylesheet">
   
-  <link rel="stylesheet" href="./style.css?v=3.4.0">
+  <link rel="stylesheet" href="./style.css?v=3.4.2">
 </head>
 <body class="h-full text-slate-800 antialiased flex flex-col selection:bg-indigo-500 selection:text-white" style="font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;">
 
@@ -257,7 +257,7 @@
         <div class="pt-3 border-t border-slate-700/80 flex items-center justify-between text-[11px] text-slate-400">
           <span class="flex items-center gap-1.5 font-mono">
             <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse inline-block"></span>
-            <span class="text-emerald-400 font-bold">LIVE v3.4.1</span>
+            <span class="text-emerald-400 font-bold">LIVE v3.4.2</span>
             <span>(2026.08.31 최신 배포)</span>
           </span>
           <button onclick="location.href=location.pathname+'?v=' + Date.now()" class="px-2.5 py-1 rounded-lg bg-slate-700 hover:bg-slate-600 text-indigo-300 font-bold transition flex items-center gap-1 cursor-pointer">
@@ -476,7 +476,7 @@
   <!-- ========================================== -->
 
   <!-- OMR Drawer Modal -->
-  <div id="omrDrawerModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+  <div hidden id="omrDrawerModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[85vh] flex flex-col shadow-2xl overflow-hidden border border-slate-200">
       <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
         <div>
@@ -504,7 +504,7 @@
   </div>
 
   <!-- Result Report Modal -->
-  <div id="resultReportModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+  <div hidden id="resultReportModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-white rounded-3xl max-w-lg w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden border border-slate-200">
       <div class="bg-gradient-to-r from-indigo-600 to-indigo-800 text-white p-6 text-center">
         <span class="text-4xl block mb-2">🏆</span>
@@ -552,7 +552,7 @@
   </div>
 
   <!-- Mobile Quick Settings Modal (Bottom Sheet on Phone) -->
-  <div id="mobileSettingsModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 mobile-sheet-modal hidden">
+  <div hidden id="mobileSettingsModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 mobile-sheet-modal hidden">
     <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-5">
       <div class="flex items-center justify-between pb-3 border-b border-slate-100">
         <div class="flex items-center gap-2">
@@ -642,7 +642,7 @@
   </div>
 
   <!-- Mobile Access Guide Modal -->
-  <div id="mobileGuideModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 mobile-sheet-modal hidden">
+  <div hidden id="mobileGuideModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 mobile-sheet-modal hidden">
     <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-5">
       <div class="flex items-center justify-between pb-3 border-b border-slate-100">
         <div class="flex items-center gap-2">
@@ -675,7 +675,7 @@
   </div>
 
   <!-- PC Keyboard Shortcuts Modal -->
-  <div id="shortcutsModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+  <div hidden id="shortcutsModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-5">
       <div class="flex items-center justify-between pb-3 border-b border-slate-100">
         <div class="flex items-center gap-2">
@@ -731,7 +731,7 @@
   </div>
 
   <!-- Dedicated Wrong Notes Review Dashboard Modal (오답노트 보관함) -->
-  <div id="wrongNotesModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-6 hidden">
+  <div hidden id="wrongNotesModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-6 hidden">
     <div class="bg-white rounded-3xl max-w-3xl w-full max-h-[90vh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden">
       <!-- Header -->
       <div class="p-5 border-b border-slate-200 flex items-center justify-between bg-slate-50 flex-shrink-0">
@@ -768,7 +768,7 @@
   </div>
 
   <!-- Dedicated Bookmarks Review Modal (북마크 보관함) -->
-  <div id="bookmarksModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-6 hidden">
+  <div hidden id="bookmarksModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-6 hidden">
     <div class="bg-white rounded-3xl max-w-3xl w-full max-h-[90vh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden">
       <!-- Header -->
       <div class="p-5 border-b border-slate-200 flex items-center justify-between bg-slate-50 flex-shrink-0">
@@ -805,7 +805,7 @@
   </div>
 
   <!-- Database and Application JS -->
-  <script src="./data/leet_data.js?v=3.4.0"></script>
-  <script src="./app.js?v=3.4.0"></script>
+  <script src="./data/leet_data.js?v=3.4.2"></script>
+  <script src="./app.js?v=3.4.2"></script>
 </body>
 </html>

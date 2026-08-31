@@ -57,6 +57,24 @@ class LeetApp {
     this.init();
   }
 
+  showEl(el) {
+    if (!el) return;
+    if (typeof el === 'string') el = document.getElementById(el);
+    if (!el) return;
+    el.classList.remove("hidden"); el.removeAttribute("hidden"); el.style.display="";
+    el.removeAttribute('hidden');
+    el.style.display = '';
+  }
+
+  hideEl(el) {
+    if (!el) return;
+    if (typeof el === 'string') el = document.getElementById(el);
+    if (!el) return;
+    el.classList.add("hidden"); el.setAttribute("hidden", "");
+    el.setAttribute('hidden', '');
+  }
+
+
   init() {
     this.loadFromStorage();
     
@@ -295,13 +313,13 @@ class LeetApp {
     const examView = document.getElementById('examView');
 
     if (viewName === 'home') {
-      if (homeView) homeView.classList.remove('hidden');
-      if (examView) examView.classList.add('hidden');
+      this.showEl(homeView);
+      this.hideEl(examView);
       this.pauseTimer();
       this.updateHomeDashboard();
     } else {
-      if (homeView) homeView.classList.add('hidden');
-      if (examView) examView.classList.remove('hidden');
+      this.hideEl(homeView);
+      this.showEl(examView);
       this.applyFilters();
       this.startTimer();
       this.setMobileTab('passage');
@@ -526,7 +544,7 @@ class LeetApp {
 
     if (results.length === 0) {
       dropdown.innerHTML = '<div class="p-3 text-xs text-slate-400 text-center">일치하는 문항이 없습니다.</div>';
-      dropdown.classList.remove('hidden');
+      dropdown.classList.remove("hidden"); dropdown.removeAttribute("hidden"); dropdown.style.display="";
       return;
     }
 
@@ -543,7 +561,7 @@ class LeetApp {
       </div>
     `).join('');
 
-    dropdown.classList.remove('hidden');
+    dropdown.classList.remove("hidden"); dropdown.removeAttribute("hidden"); dropdown.style.display="";
   }
 
   // --- TIMER ENGINE ---
@@ -622,7 +640,7 @@ class LeetApp {
       this.renderCurrentSet();
       this.scrollToTop();
       const omrModal = document.getElementById('omrDrawerModal');
-      if (omrModal) omrModal.classList.add('hidden');
+      if (omrModal) omrModal.classList.add("hidden"); omrModal.setAttribute("hidden", "");
     }
   }
 
@@ -753,11 +771,11 @@ class LeetApp {
 
     if (set.questions.length <= 1) {
       tabsContainer.innerHTML = '';
-      tabsContainer.classList.add('hidden');
+      tabsContainer.classList.add("hidden"); tabsContainer.setAttribute("hidden", "");
       return;
     }
 
-    tabsContainer.classList.remove('hidden');
+    tabsContainer.classList.remove("hidden"); tabsContainer.removeAttribute("hidden"); tabsContainer.style.display="";
     let tabsHTML = '<div class="flex items-center gap-2 p-1 bg-slate-200/70 rounded-xl">';
     
     set.questions.forEach((q, idx) => {
@@ -969,7 +987,7 @@ class LeetApp {
     const passagePane = document.getElementById('passagePane');
     const questionsPane = document.getElementById('questionsPane');
     const tabsContainer = document.getElementById('setQuestionTabs');
-    if (tabsContainer) tabsContainer.classList.add('hidden');
+    if (tabsContainer) tabsContainer.classList.add("hidden"); tabsContainer.setAttribute("hidden", "");
 
     const totalSets = this.filteredSets;
     if (!totalSets.length) {
@@ -1110,7 +1128,7 @@ class LeetApp {
   openBookmarksModal() {
     const modal = document.getElementById('bookmarksModal');
     if (!modal) return;
-    modal.classList.remove('hidden');
+    modal.classList.remove("hidden"); modal.removeAttribute("hidden"); modal.style.display="";
     this.renderBookmarksList('all');
   }
 
@@ -1210,7 +1228,7 @@ class LeetApp {
   openWrongNotesModal() {
     const modal = document.getElementById('wrongNotesModal');
     if (!modal) return;
-    modal.classList.remove('hidden');
+    modal.classList.remove("hidden"); modal.removeAttribute("hidden"); modal.style.display="";
     this.renderWrongNotesList('all');
   }
 
@@ -1448,7 +1466,7 @@ class LeetApp {
     if (accuracyRateEl) accuracyRateEl.textContent = `${scorePct}%`;
     if (answeredCountEl) answeredCountEl.textContent = `${answeredQ}개 풀이 (${totalQ - answeredQ}개 미응답)`;
 
-    if (modal) modal.classList.remove('hidden');
+    if (modal) modal.classList.remove("hidden"); modal.removeAttribute("hidden"); modal.style.display="";
   }
 
   // --- EVENT BINDINGS ---
@@ -1474,7 +1492,7 @@ class LeetApp {
     document.addEventListener('click', (e) => {
       const dropdown = document.getElementById('homeSearchResultsDropdown');
       if (dropdown && !e.target.closest('#homeHeaderSearchInput')) {
-        dropdown.classList.add('hidden');
+        dropdown.classList.add("hidden"); dropdown.setAttribute("hidden", "");
       }
     });
 
@@ -1505,31 +1523,31 @@ class LeetApp {
     const omrCloseBtn = document.getElementById('omrCloseBtn');
     if (omrOpenBtn && omrModal) {
       omrOpenBtn.addEventListener('click', () => {
-        omrModal.classList.remove('hidden');
+        omrModal.classList.remove("hidden"); omrModal.removeAttribute("hidden"); omrModal.style.display="";
         this.renderOMR();
       });
     }
     if (omrCloseBtn && omrModal) {
-      omrCloseBtn.addEventListener('click', () => omrModal.classList.add('hidden'));
+      omrCloseBtn.addEventListener('click', () => omrModal.classList.add("hidden"); omrModal.setAttribute("hidden", ""));
     }
 
     // Modal Close Buttons
     const closeBookmarkBtn = document.getElementById('closeBookmarksBtn');
     if (closeBookmarkBtn) {
       const modal = document.getElementById('bookmarksModal');
-      closeBookmarkBtn.addEventListener('click', () => modal && modal.classList.add('hidden'));
+      closeBookmarkBtn.addEventListener('click', () => modal && modal.classList.add("hidden"); modal.setAttribute("hidden", ""));
     }
 
     const closeWrongBtn = document.getElementById('closeWrongNotesBtn');
     if (closeWrongBtn) {
       const modal = document.getElementById('wrongNotesModal');
-      closeWrongBtn.addEventListener('click', () => modal && modal.classList.add('hidden'));
+      closeWrongBtn.addEventListener('click', () => modal && modal.classList.add("hidden"); modal.setAttribute("hidden", ""));
     }
 
     const closeResultBtn = document.getElementById('closeResultModalBtn');
     const resultModal = document.getElementById('resultReportModal') || document.getElementById('examResultModal');
     if (closeResultBtn && resultModal) {
-      closeResultBtn.addEventListener('click', () => resultModal.classList.add('hidden'));
+      closeResultBtn.addEventListener('click', () => resultModal.classList.add("hidden"); resultModal.setAttribute("hidden", ""));
     }
 
     // Mobile Guide Modal
@@ -1539,13 +1557,13 @@ class LeetApp {
     const closeMobileGuideBtn2 = document.getElementById('closeMobileGuideBtn2');
 
     if (mobileGuideBtn && mobileGuideModal) {
-      mobileGuideBtn.addEventListener('click', () => mobileGuideModal.classList.remove('hidden'));
+      mobileGuideBtn.addEventListener('click', () => mobileGuideModal.classList.remove("hidden"); mobileGuideModal.removeAttribute("hidden"); mobileGuideModal.style.display="");
     }
     if (closeMobileGuideBtn && mobileGuideModal) {
-      closeMobileGuideBtn.addEventListener('click', () => mobileGuideModal.classList.add('hidden'));
+      closeMobileGuideBtn.addEventListener('click', () => mobileGuideModal.classList.add("hidden"); mobileGuideModal.setAttribute("hidden", ""));
     }
     if (closeMobileGuideBtn2 && mobileGuideModal) {
-      closeMobileGuideBtn2.addEventListener('click', () => mobileGuideModal.classList.add('hidden'));
+      closeMobileGuideBtn2.addEventListener('click', () => mobileGuideModal.classList.add("hidden"); mobileGuideModal.setAttribute("hidden", ""));
     }
 
     // Shortcuts Modal
@@ -1555,13 +1573,13 @@ class LeetApp {
     const closeShortcutsBtn2 = document.getElementById('closeShortcutsModalBtn2');
 
     if (shortcutsBtn && shortcutsModal) {
-      shortcutsBtn.addEventListener('click', () => shortcutsModal.classList.remove('hidden'));
+      shortcutsBtn.addEventListener('click', () => shortcutsModal.classList.remove("hidden"); shortcutsModal.removeAttribute("hidden"); shortcutsModal.style.display="");
     }
     if (closeShortcutsBtn && shortcutsModal) {
-      closeShortcutsBtn.addEventListener('click', () => shortcutsModal.classList.add('hidden'));
+      closeShortcutsBtn.addEventListener('click', () => shortcutsModal.classList.add("hidden"); shortcutsModal.setAttribute("hidden", ""));
     }
     if (closeShortcutsBtn2 && shortcutsModal) {
-      closeShortcutsBtn2.addEventListener('click', () => shortcutsModal.classList.add('hidden'));
+      closeShortcutsBtn2.addEventListener('click', () => shortcutsModal.classList.add("hidden"); shortcutsModal.setAttribute("hidden", ""));
     }
 
     // Reset All Answers
