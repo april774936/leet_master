@@ -313,13 +313,13 @@ class LeetApp {
     const examView = document.getElementById('examView');
 
     if (viewName === 'home') {
-      this.showEl(homeView);
-      this.hideEl(examView);
+      if (homeView) { homeView.style.display = 'flex'; homeView.classList.remove('hidden'); homeView.removeAttribute('hidden'); }
+      if (examView) { examView.style.display = 'none'; examView.classList.add('hidden'); examView.setAttribute('hidden', ''); }
       this.pauseTimer();
       this.updateHomeDashboard();
     } else {
-      this.hideEl(homeView);
-      this.showEl(examView);
+      if (homeView) { homeView.style.display = 'none'; homeView.classList.add('hidden'); homeView.setAttribute('hidden', ''); }
+      if (examView) { examView.style.display = 'flex'; examView.style.flexDirection = 'column'; examView.classList.remove('hidden'); examView.removeAttribute('hidden'); }
       this.applyFilters();
       this.startTimer();
       this.setMobileTab('passage');
