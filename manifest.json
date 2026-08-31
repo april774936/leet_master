@@ -1,0 +1,16 @@
+{
+  "name": "LEET 기출 마스터",
+  "short_name": "LEET 마스터",
+  "description": "2023~2026학년도 법학적성시험(LEET) 4개년 280문항 실전 인터랙티브 트레이닝",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#4f46e5",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚖️</text></svg>",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml"
+    }
+  ]
+}

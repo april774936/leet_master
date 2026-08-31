@@ -1,0 +1,137 @@
+@charset "UTF-8";
+
+/* Typography */
+.font-passage {
+  font-family: "Noto Serif KR", "Batang", "Apple Myungjo", serif;
+  line-height: 1.85;
+  letter-spacing: -0.015em;
+  word-break: keep-all;
+}
+
+/* Base custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Symbols & Highlights */
+.symbol-circle {
+  font-weight: 700;
+  display: inline-block;
+}
+.symbol-bracket {
+  font-weight: 700;
+  color: #1e1b4b;
+  background-color: #f1f5f9;
+  padding: 0 3px;
+  border-radius: 4px;
+}
+.symbol-bogi {
+  color: #0f172a;
+  font-weight: 700;
+  display: inline-block;
+  margin-top: 4px;
+}
+
+/* LEET Exam Specific Box */
+.leet-box {
+  background-color: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.5rem;
+  padding: 1rem 1.25rem;
+  line-height: 1.75;
+  white-space: pre-wrap;
+  word-break: keep-all;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+/* Highlighting styles */
+mark.hl-yellow { background-color: #fef08a; padding: 1px 3px; border-radius: 3px; }
+mark.hl-green { background-color: #bbf7d0; padding: 1px 3px; border-radius: 3px; }
+mark.hl-pink { background-color: #fbcfe8; padding: 1px 3px; border-radius: 3px; }
+mark.hl-blue { background-color: #bae6fd; padding: 1px 3px; border-radius: 3px; }
+
+/* Draggable resizer */
+.resizer-bar {
+  cursor: col-resize;
+  background-color: #e2e8f0;
+  transition: background-color 0.15s ease;
+  z-index: 10;
+}
+.resizer-bar:hover, .resizer-bar.dragging {
+  background-color: #6366f1;
+}
+
+/* Interactive Option Items */
+.option-item {
+  transition: all 0.15s ease-in-out;
+  user-select: none;
+  min-height: 48px; /* Mobile touch friendly target */
+}
+.option-item:hover {
+  transform: translateY(-1px);
+}
+.option-item:active {
+  transform: scale(0.99);
+}
+
+/* Home Card Selections */
+.setup-card {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+.setup-card:hover {
+  transform: translateY(-2px);
+}
+.setup-card.selected {
+  border-color: #4f46e5;
+  background-color: #f5f3ff;
+  box-shadow: 0 4px 12px -2px rgba(79, 70, 229, 0.15);
+}
+
+.chip-btn {
+  transition: all 0.15s ease;
+  user-select: none;
+  cursor: pointer;
+}
+.chip-btn:hover {
+  border-color: #6366f1;
+}
+.chip-btn.selected {
+  background-color: #4f46e5;
+  color: #ffffff;
+  border-color: #4f46e5;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.25);
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .desktop-resizer {
+    display: none !important;
+  }
+  
+  .mobile-tab-view {
+    display: flex !important;
+  }
+  
+  .mobile-pane-hidden {
+    display: none !important;
+  }
+
+  .mobile-pane-visible {
+    display: flex !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}

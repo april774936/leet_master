@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="ko" class="h-full bg-slate-50">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#4f46e5">
+  <title>LEET 기출 마스터 - 4개년(2023~2026) 실전 트레이닝</title>
+  
+  <!-- Web App Manifest for PWA / Mobile Add-to-Home-Screen -->
+  <link rel="manifest" href="./manifest.json">
+  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚖️</text></svg>">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="LEET 마스터">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter & Noto Serif KR -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Serif+KR:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body class="h-full font-sans text-slate-800 antialiased flex flex-col selection:bg-indigo-500 selection:text-white">
+
+  <!-- ========================================== -->
+  <!-- 1. HOME / LOBBY VIEW (홈 화면)             -->
+  <!-- ========================================== -->
+  <div id="homeView" class="min-h-full flex flex-col bg-slate-900 text-white overflow-y-auto">
+    <!-- Top Nav -->
+    <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-30 px-4 sm:px-8 py-3.5 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <span class="w-9 h-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-black text-lg shadow-lg shadow-indigo-500/30">⚖️</span>
+        <div>
+          <h1 class="text-lg font-black tracking-tight text-white leading-none">LEET 기출 마스터</h1>
+          <span class="text-xs text-indigo-400 font-medium">2023~2026 4개년 실전 트레이닝</span>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="homeMobileGuideBtn" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 border border-slate-700 transition flex items-center gap-1.5">
+          📱 <span>모바일 접속</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Lobby Container -->
+    <main class="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-12 flex flex-col justify-center">
+      
+      <!-- Stats Dashboard Banner -->
+      <div class="mb-8 grid grid-cols-3 gap-3 sm:gap-4 bg-slate-800/80 border border-slate-700/80 rounded-2xl p-4 sm:p-5 backdrop-blur shadow-xl">
+        <div class="text-center border-r border-slate-700/60 pr-2">
+          <span class="text-[11px] sm:text-xs text-slate-400 font-medium">총 풀이 문항</span>
+          <div id="homeTotalSolved" class="text-lg sm:text-2xl font-black text-white mt-0.5">0 / 280</div>
+        </div>
+        <div class="text-center border-r border-slate-700/60 px-2">
+          <span class="text-[11px] sm:text-xs text-slate-400 font-medium">누적 정답률</span>
+          <div id="homeAccuracyRate" class="text-lg sm:text-2xl font-black text-emerald-400 mt-0.5">0%</div>
+        </div>
+        <div class="text-center pl-2">
+          <span class="text-[11px] sm:text-xs text-slate-400 font-medium">오답 노트</span>
+          <div id="homeWrongCount" class="text-lg sm:text-2xl font-black text-rose-400 mt-0.5">0개</div>
+        </div>
+      </div>
+
+      <!-- Setup Box -->
+      <div class="bg-slate-800/60 border border-slate-700/80 rounded-3xl p-6 sm:p-8 backdrop-blur shadow-2xl space-y-7">
+        
+        <!-- STEP 1: 과목 선택 -->
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-indigo-400 mb-3">
+            STEP 1 · 학습할 과목 선택
+          </label>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3" id="homeSubjectCards">
+            <!-- 언어이해 Card -->
+            <div data-val="언어이해" class="setup-card selected bg-slate-800 border-2 border-indigo-500 rounded-2xl p-4 relative flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-2xl">📖</span>
+                  <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">3 in 1 세트</span>
+                </div>
+                <h3 class="font-extrabold text-base text-white">언어이해</h3>
+                <p class="text-xs text-slate-400 mt-1">40개 세트 (총 120문항)</p>
+              </div>
+              <div class="mt-3 text-[11px] text-indigo-300 font-medium">지문 고정 동시 채점</div>
+            </div>
+
+            <!-- 추리논증 Card -->
+            <div data-val="추리논증" class="setup-card bg-slate-800 border-2 border-slate-700 hover:border-slate-600 rounded-2xl p-4 relative flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-2xl">💡</span>
+                  <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-700 text-slate-300">1 in 1 단일</span>
+                </div>
+                <h3 class="font-extrabold text-base text-white">추리논증</h3>
+                <p class="text-xs text-slate-400 mt-1">160개 문항</p>
+              </div>
+              <div class="mt-3 text-[11px] text-slate-400 font-medium">즉시 해설 및 채점</div>
+            </div>
+
+            <!-- 전체 풀기 Card -->
+            <div data-val="all" class="setup-card bg-slate-800 border-2 border-slate-700 hover:border-slate-600 rounded-2xl p-4 relative flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-2xl">🏆</span>
+                  <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-700 text-slate-300">종합 모의</span>
+                </div>
+                <h3 class="font-extrabold text-base text-white">전체 과목</h3>
+                <p class="text-xs text-slate-400 mt-1">200개 세트 (총 280문항)</p>
+              </div>
+              <div class="mt-3 text-[11px] text-slate-400 font-medium">전체 범위 훈련</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 2: 연도 선택 -->
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-indigo-400 mb-3">
+            STEP 2 · 기출 연도 선택
+          </label>
+          <div class="flex flex-wrap gap-2" id="homeYearChips">
+            <button data-val="all" class="chip-btn selected px-4 py-2 rounded-xl text-xs font-semibold bg-indigo-600 text-white border border-indigo-500 shadow">
+              🌟 4개년 전체
+            </button>
+            <button data-val="2026" class="chip-btn px-4 py-2 rounded-xl text-xs font-semibold bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700">
+              2026학년도
+            </button>
+            <button data-val="2025" class="chip-btn px-4 py-2 rounded-xl text-xs font-semibold bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700">
+              2025학년도
+            </button>
+            <button data-val="2024" class="chip-btn px-4 py-2 rounded-xl text-xs font-semibold bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700">
+              2024학년도
+            </button>
+            <button data-val="2023" class="chip-btn px-4 py-2 rounded-xl text-xs font-semibold bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700">
+              2023학년도
+            </button>
+          </div>
+        </div>
+
+        <!-- STEP 3: 풀이 분량 (세트 수) 선택 -->
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-indigo-400 mb-3">
+            STEP 3 · 오늘 풀이할 분량 선택
+          </label>
+          <div class="grid grid-cols-2 sm:grid-cols-5 gap-2" id="homeLimitChips">
+            <button data-val="1" class="chip-btn px-3 py-2.5 rounded-xl text-xs font-semibold bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700 text-center">
+              ☕ 1세트 <span class="block text-[10px] text-slate-400 font-normal">맛보기 (10분)</span>
+            </button>
+            <button data-val="3" class="chip-btn selected px-3 py-2.5 rounded-xl text-xs font-semibold bg-indigo-600 text-white border border-indigo-500 shadow text-center">
+              ⚡ 3세트 <span class="block text-[10px] text-indigo-200 font-normal">데일리 코스 (30분)</span>
+            </button>
+            <button data-val="5" class="chip-btn px-3 py-2.5 rounded-xl text-xs font-semibold bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700 text-center">
+              🔥 5세트 <span class="block text-[10px] text-slate-400 font-normal">집중 훈련 (50분)</span>
+            </button>
+            <button data-val="10" class="chip-btn px-3 py-2.5 rounded-xl text-xs font-semibold bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700 text-center">
+              🎯 10세트 <span class="block text-[10px] text-slate-400 font-normal">하프 모의 (100분)</span>
+            </button>
+            <button data-val="all" class="chip-btn px-3 py-2.5 rounded-xl text-xs font-semibold bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700 text-center col-span-2 sm:col-span-1">
+              🏆 전체 풀기 <span class="block text-[10px] text-slate-400 font-normal">실전 전범위</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- STEP 4: 부가 학습 옵션 토글 -->
+        <div class="pt-2 border-t border-slate-700/80 flex flex-wrap items-center justify-between gap-4">
+          <label class="flex items-center gap-2.5 cursor-pointer text-xs font-semibold text-slate-300">
+            <input type="checkbox" id="homeShuffleCheckbox" class="w-4 h-4 rounded text-indigo-600 bg-slate-700 border-slate-600 focus:ring-indigo-500">
+            <span>🔀 무작위 랜덤 셔플</span>
+          </label>
+          
+          <label class="flex items-center gap-2.5 cursor-pointer text-xs font-semibold text-rose-300">
+            <input type="checkbox" id="homeWrongOnlyCheckbox" class="w-4 h-4 rounded text-rose-600 bg-slate-700 border-slate-600 focus:ring-rose-500">
+            <span>❌ 오답 노트만 집중 풀기 (<span id="homeWrongOnlyCountLabel">0</span>)</span>
+          </label>
+        </div>
+
+        <!-- START BUTTON (BIG CTA) -->
+        <div class="pt-4">
+          <button id="homeStartBtn" class="w-full py-4 rounded-2xl bg-indigo-600 hover:bg-indigo-500 active:scale-[0.99] text-white text-base sm:text-lg font-black shadow-xl shadow-indigo-600/30 transition flex items-center justify-center gap-2">
+            <span>🚀 LEET 실전 트레이닝 시작하기</span>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Quick Actions Bar -->
+      <div class="mt-6 flex flex-wrap items-center justify-between text-xs text-slate-400 gap-3 px-2">
+        <span>💾 모든 풀이 데이터는 브라우저에 자동 저장됩니다.</span>
+        <button id="homeResetAllBtn" class="hover:text-rose-400 underline transition">전체 풀이 기록 초기화</button>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 2. EXAM / SOLVER VIEW (문제 풀이 화면)       -->
+  <!-- ========================================== -->
+  <div id="examView" class="hidden h-full flex flex-col bg-slate-100 overflow-hidden">
+    
+    <!-- Top Control Navigation Header -->
+    <header class="bg-white border-b border-slate-200 px-4 py-2.5 flex items-center justify-between gap-3 flex-shrink-0 z-20 shadow-sm">
+      <div class="flex items-center gap-3 flex-wrap">
+        <!-- Back to Home Button -->
+        <button id="backToHomeBtn" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs border border-slate-300 transition flex items-center gap-1.5 shadow-sm" title="홈 화면으로 돌아가기">
+          <span>🏠</span> <span class="hidden sm:inline">홈으로</span>
+        </button>
+
+        <div class="h-5 w-px bg-slate-200 hidden sm:block"></div>
+
+        <!-- Subject Switcher -->
+        <div class="inline-flex rounded-lg p-0.5 bg-slate-100 border border-slate-200 text-xs font-semibold gap-1">
+          <button data-subject="언어이해" class="filter-subject-btn px-2.5 py-1 rounded-md bg-indigo-600 text-white shadow-sm transition">
+            📖 언어이해
+          </button>
+          <button data-subject="추리논증" class="filter-subject-btn px-2.5 py-1 rounded-md text-slate-700 hover:bg-slate-200 transition">
+            💡 추리논증
+          </button>
+          <button data-subject="all" class="filter-subject-btn px-2.5 py-1 rounded-md text-slate-700 hover:bg-slate-200 transition hidden sm:inline-block">
+            전체
+          </button>
+        </div>
+
+        <!-- Year Filter -->
+        <div class="flex items-center gap-1 text-xs">
+          <select id="yearFilterSelect" class="bg-slate-50 border border-slate-300 rounded-lg px-2 py-1 font-medium text-slate-700 focus:ring-2 focus:ring-indigo-500 outline-none">
+            <option value="all">4개년 전체</option>
+            <option value="2026">2026학년도</option>
+            <option value="2025">2025학년도</option>
+            <option value="2024">2024학년도</option>
+            <option value="2023">2023학년도</option>
+          </select>
+        </div>
+
+        <!-- Limit Filter -->
+        <div class="flex items-center gap-1 text-xs">
+          <select id="limitFilterSelect" class="bg-slate-50 border border-slate-300 rounded-lg px-2 py-1 font-medium text-slate-700 focus:ring-2 focus:ring-indigo-500 outline-none">
+            <option value="all">전체</option>
+            <option value="1">1세트</option>
+            <option value="3">3세트</option>
+            <option value="5">5세트</option>
+            <option value="10">10세트</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Controls & Right Actions -->
+      <div class="flex items-center gap-2">
+        <!-- Shuffle Toggle Button -->
+        <button id="shuffleToggleBtn" class="px-2 py-1 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-semibold transition hidden sm:flex items-center gap-1" title="문항 세트 순서를 무작위로 섞습니다">
+          🔀 셔플
+        </button>
+
+        <!-- Wrong Answers Filter Toggle Button -->
+        <button id="wrongFilterBtn" class="px-2 py-1 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-semibold transition flex items-center gap-1" title="틀렸던 오답 문제만 모아서 풉니다">
+          ❌ 오답 (0)
+        </button>
+
+        <!-- Passage Side Switcher -->
+        <button id="sideToggleBtn" class="px-2 py-1 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-semibold transition hidden md:block" title="지문 위치 변경">
+          🔄 지문 위치
+        </button>
+
+        <!-- Font Size Adjustment -->
+        <div class="hidden sm:flex items-center bg-slate-100 rounded-lg p-0.5 text-xs border border-slate-200">
+          <button data-size="sm" class="font-size-btn px-2 py-0.5 rounded text-slate-600 hover:text-slate-900">A-</button>
+          <button data-size="md" class="font-size-btn px-2 py-0.5 rounded bg-indigo-100 text-indigo-700 font-bold">A</button>
+          <button data-size="lg" class="font-size-btn px-2 py-0.5 rounded text-slate-600 hover:text-slate-900">A+</button>
+        </div>
+
+        <!-- Highlighter Tool -->
+        <button id="highlighterToggleBtn" title="형광펜 도구" class="p-1.5 rounded-lg border border-slate-200 hover:bg-slate-100 text-slate-600 transition flex items-center text-xs font-semibold">
+          🖍️
+        </button>
+
+        <!-- Timer Button -->
+        <button id="timerToggleBtn" class="flex items-center gap-1 px-2.5 py-1 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-semibold transition">
+          <svg id="timerPlayIcon" class="w-3.5 h-3.5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span id="timerDisplay" class="font-mono font-bold text-slate-900">00:00</span>
+        </button>
+
+        <!-- OMR Drawer Button -->
+        <button id="omrToggleBtn" class="px-2.5 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs font-bold transition flex items-center gap-1">
+          📊 <span>OMR</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Sub Header: Progress Bar & Set Navigator -->
+    <div class="bg-white border-b border-slate-200 px-4 py-2 flex items-center justify-between text-xs flex-shrink-0">
+      <div class="flex items-center gap-3 flex-1 max-w-md mr-4">
+        <span class="font-bold text-slate-700" id="progressStatusText">0 / 0 풀이 완료</span>
+        <div class="flex-1 bg-slate-100 h-2 rounded-full overflow-hidden border border-slate-200">
+          <div id="progressBarFill" class="bg-indigo-600 h-full w-0 transition-all duration-300"></div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <span id="headerScoreBadge" class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold">0개 정답</span>
+        <div class="h-4 w-px bg-slate-200"></div>
+        <button id="prevSetBtn" class="px-2.5 py-1 rounded border border-slate-200 hover:bg-slate-100 font-bold text-slate-700 transition disabled:opacity-30">◀ 이전</button>
+        <span id="currentSetIndicator" class="font-bold text-slate-800 px-1">세트 1 / 1</span>
+        <button id="nextSetBtn" class="px-2.5 py-1 rounded border border-slate-200 hover:bg-slate-100 font-bold text-slate-700 transition disabled:opacity-30">다음 ▶</button>
+      </div>
+    </div>
+
+    <!-- Mobile View Switcher Tab Bar (Visible on mobile/tablets < 768px) -->
+    <div class="mobile-tab-view hidden md:hidden bg-slate-200 p-1.5 gap-1.5 border-b border-slate-300 flex-shrink-0">
+      <button id="mobileTabPassage" class="flex-1 py-2 rounded-lg bg-indigo-600 text-white font-bold text-xs shadow transition text-center">
+        📖 지문 보기
+      </button>
+      <button id="mobileTabQuestions" class="flex-1 py-2 rounded-lg bg-slate-100 text-slate-700 font-bold text-xs transition text-center">
+        📝 문제 풀기
+      </button>
+    </div>
+
+    <!-- Main Content Area: Split-Pane -->
+    <div class="flex-1 flex overflow-hidden relative" id="mainSplitPane">
+      
+      <!-- LEFT PANE: Set Passage (제시문 영역) -->
+      <section id="passagePane" class="w-full md:w-1/2 h-full flex flex-col bg-white overflow-y-auto border-r border-slate-200 p-5 sm:p-7 mobile-pane-visible">
+        <div class="mb-4 pb-3 border-b border-slate-200">
+          <div class="flex items-center gap-2 flex-wrap mb-2" id="passageBadges">
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-100 text-indigo-800">언어이해</span>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700">2026학년도</span>
+          </div>
+          <h2 id="passageTitle" class="text-base sm:text-lg font-black text-slate-900 leading-snug">
+            지문 제목
+          </h2>
+          <div class="flex items-center justify-between text-xs text-slate-400 mt-2">
+            <span>공식 법학적성시험 기출 본문</span>
+            <span id="passageCharCount" class="font-mono font-medium">0자</span>
+          </div>
+        </div>
+
+        <article id="passageBody" class="font-passage text-base leading-loose text-slate-900 pb-16">
+          <!-- Formatted passage rendered dynamically -->
+        </article>
+      </section>
+
+      <!-- RESIZER BAR (Desktop Only) -->
+      <div id="resizerBar" class="desktop-resizer w-1.5 hover:w-2 bg-slate-200 hover:bg-indigo-500 cursor-col-resize transition-all z-10 flex items-center justify-center">
+        <div class="w-0.5 h-6 bg-slate-400 rounded"></div>
+      </div>
+
+      <!-- RIGHT PANE: Questions & Options (3-in-1 문항 영역) -->
+      <section id="questionsPane" class="w-full md:w-1/2 h-full flex flex-col bg-slate-50 overflow-y-auto p-4 sm:p-6 mobile-pane-hidden">
+        
+        <!-- 3in1 Questions Tab Bar (For 3-question sets) -->
+        <div id="setQuestionTabs" class="mb-4 sticky top-0 bg-slate-50/95 backdrop-blur z-10 pt-1 pb-2">
+          <!-- Question tabs 1, 2, 3 rendered here -->
+        </div>
+
+        <!-- Questions container -->
+        <div id="questionsContainer" class="flex-1 space-y-6 pb-20">
+          <!-- Question cards rendered dynamically -->
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 3. MODALS (OMR, Result, Mobile Guide)      -->
+  <!-- ========================================== -->
+
+  <!-- OMR Drawer Modal -->
+  <div id="omrDrawerModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[85vh] flex flex-col shadow-2xl overflow-hidden border border-slate-200">
+      <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+        <div>
+          <h3 class="text-base font-extrabold text-slate-900">전체 OMR 카드</h3>
+          <p class="text-xs text-slate-500">답안 표기 현황 및 바로가기</p>
+        </div>
+        <button id="omrCloseBtn" class="text-slate-400 hover:text-slate-600 text-lg font-bold">✕</button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto p-6">
+        <div id="omrGridContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <!-- OMR cards rendered here -->
+        </div>
+      </div>
+
+      <div class="p-4 border-t border-slate-200 bg-slate-50 flex items-center justify-between gap-3">
+        <button id="resetAnswersBtn" class="text-xs text-rose-600 hover:underline font-semibold">
+          🗑️ 기록 초기화
+        </button>
+        <button id="finalSubmitBtn" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow transition">
+          🏁 최종 답안 제출 및 전체 성적표 확인
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Result Report Modal -->
+  <div id="resultReportModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-lg w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden border border-slate-200">
+      <div class="bg-gradient-to-r from-indigo-600 to-indigo-800 text-white p-6 text-center">
+        <span class="text-4xl block mb-2">🏆</span>
+        <h3 class="text-xl font-black">LEET 풀이 성적표</h3>
+        <p class="text-xs text-indigo-200 mt-1">풀이 완료 보고서 및 오답 분석</p>
+      </div>
+
+      <div class="p-6 overflow-y-auto flex-1 space-y-6">
+        <div class="grid grid-cols-2 gap-3 text-center">
+          <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200">
+            <span class="text-xs text-slate-500 font-semibold">총 득점</span>
+            <div id="resultTotalScore" class="text-2xl font-black text-indigo-600 mt-1">0 / 0</div>
+          </div>
+          <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200">
+            <span class="text-xs text-slate-500 font-semibold">정답률</span>
+            <div id="resultAccuracyRate" class="text-2xl font-black text-emerald-600 mt-1">0%</div>
+          </div>
+          <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200">
+            <span class="text-xs text-slate-500 font-semibold">소요 시간</span>
+            <div id="resultTimeSpent" class="text-lg font-bold text-slate-800 mt-1">00분 00초</div>
+          </div>
+          <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200">
+            <span class="text-xs text-slate-500 font-semibold">응답 상태</span>
+            <div id="resultAnsweredCount" class="text-xs font-bold text-slate-700 mt-1">0개 풀이</div>
+          </div>
+        </div>
+
+        <div>
+          <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">오답 문항 분석</h4>
+          <div id="resultWrongListContainer" class="space-y-2 max-h-48 overflow-y-auto">
+            <!-- Wrong items rendered here -->
+          </div>
+        </div>
+      </div>
+
+      <div class="p-4 border-t border-slate-200 bg-slate-50 flex items-center gap-3">
+        <button id="modalRetryWrongBtn" class="w-1/2 py-3 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs border border-rose-200 transition">
+          ❌ 오답만 모아 다시 풀기
+        </button>
+        <button id="closeResultModalBtn" class="w-1/2 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs transition shadow">
+          확인 및 닫기
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Access Guide Modal -->
+  <div id="mobileGuideModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-5">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="text-2xl">📱</span>
+          <h3 class="text-lg font-black text-slate-900">모바일 / 태블릿 접속 방법</h3>
+        </div>
+        <button id="closeMobileGuideBtn" class="text-slate-400 hover:text-slate-600 font-bold text-lg">✕</button>
+      </div>
+
+      <div class="space-y-4 text-xs text-slate-600 leading-relaxed">
+        <div class="p-3.5 bg-indigo-50 border border-indigo-200 rounded-xl text-indigo-900">
+          <h4 class="font-bold mb-1 text-sm">1. 동일 와이파이(Wi-Fi) 접속 (가장 빠름)</h4>
+          <p>스마트폰/아이패드를 Mac과 같은 와이파이에 연결한 뒤 브라우저 주소창에 아래 주소를 입력하세요:</p>
+          <div class="mt-2 p-2 bg-white rounded border border-indigo-300 font-mono font-bold text-indigo-700 text-center select-all" id="mobileWifiUrl">
+            http://localhost:8080
+          </div>
+        </div>
+
+        <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-700">
+          <h4 class="font-bold mb-1 text-sm">2. 홈 화면에 앱으로 추가 (PWA)</h4>
+          <p>모바일 Safari나 Chrome에서 <strong>[공유] ➔ [홈 화면에 추가]</strong>를 누르면 일반 앱처럼 전체화면으로 이용 가능합니다.</p>
+        </div>
+
+        <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-700">
+          <h4 class="font-bold mb-1 text-sm">3. 무료 웹 호스팅 배포 (GitHub Pages 등)</h4>
+          <p>본 정적 웹앱을 GitHub Pages나 Vercel에 업로드하면 언제 어디서든 스마트폰으로 접속할 수 있습니다.</p>
+        </div>
+      </div>
+
+      <button id="closeMobileGuideBtn2" class="w-full py-3 rounded-xl bg-slate-900 text-white font-bold text-xs shadow transition">
+        확인했습니다
+      </button>
+    </div>
+  </div>
+
+  <!-- Database and Application JS -->
+  <script src="./data/leet_data.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
