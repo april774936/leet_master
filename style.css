@@ -1,5 +1,8 @@
 @charset "UTF-8";
 
+/* Google Fonts must be @imported FIRST before any other rules */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700;900&family=Pretendard:wght@400;500;600;700;800;900&display=swap');
+
 /* =================================================== */
 /* 0. CRITICAL DISPLAY & MODAL OVERLAY FIX             */
 /* =================================================== */
@@ -60,7 +63,7 @@ body, button, input, select, textarea {
 }
 
 /* Import Official Korean Exam Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700;900&family=Pretendard:wght@400;500;600;700;800;900&display=swap');
+/* import moved to top */
 
 /* Typography & Passage Styling (Official LEET Exam Feel) */
 .font-passage {

@@ -21,7 +21,12 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&family=Noto+Serif+KR:wght@400;500;600;700;900&display=swap" rel="stylesheet">
   
-  <link rel="stylesheet" href="./style.css?v=3.4.2">
+  <!-- No-cache headers to force GitHub Pages CDN to serve fresh content -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  
+  <link rel="stylesheet" href="./style.css?v=3.4.5">
 </head>
 <body class="h-full text-slate-800 antialiased flex flex-col selection:bg-indigo-500 selection:text-white" style="font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;">
 
@@ -257,7 +262,7 @@
         <div class="pt-3 border-t border-slate-700/80 flex items-center justify-between text-[11px] text-slate-400">
           <span class="flex items-center gap-1.5 font-mono">
             <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse inline-block"></span>
-            <span class="text-emerald-400 font-bold">LIVE v3.4.3</span>
+            <span class="text-emerald-400 font-bold">LIVE v3.4.5</span>
             <span>(2026.08.31 최신 배포)</span>
           </span>
           <button onclick="location.href=location.pathname+'?v=' + Date.now()" class="px-2.5 py-1 rounded-lg bg-slate-700 hover:bg-slate-600 text-indigo-300 font-bold transition flex items-center gap-1 cursor-pointer">
@@ -805,9 +810,9 @@
   </div>
 
   <!-- CRITICAL: App Proxy Stub (MUST load first to prevent onclick ReferenceError) -->
-  <script src="./app_stub.js?v=3.4.4"></script>
+  <script src="./app_stub.js?v=3.4.5"></script>
   <!-- Database and Application JS -->
-  <script src="./data/leet_data.js?v=3.4.4"></script>
-  <script src="./app.js?v=3.4.4"></script>
+  <script src="./data/leet_data.js?v=3.4.5"></script>
+  <script src="./app.js?v=3.4.5"></script>
 </body>
 </html>
