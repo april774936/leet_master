@@ -1,4 +1,4 @@
-// LEET Interactive Training Platform Engine v3.3
+// LEET Interactive Training Platform Engine v3.4
 // Features: Granular Multi-Year Selection, Direct Limit Chips (No Slider), Bookmark Archive, Wrong Notes Archive, Quick Syntax Search (26추11, 24언3), Official Paper Typography, Mobile Swipe
 
 class LeetApp {
@@ -99,12 +99,17 @@ class LeetApp {
       if (savedSettings) {
         const s = JSON.parse(savedSettings);
         if (s.subject) this.selectedSubject = s.subject;
-        if (s.years && Array.isArray(s.years)) this.selectedYears = s.years;
+        if (s.years && Array.isArray(s.years) && s.years.length > 0) this.selectedYears = s.years;
         if (s.limit) this.selectedLimit = s.limit;
         if (s.mode) this.examMode = s.mode;
         if (s.targetFilter) this.targetFilter = s.targetFilter;
         if (s.fontSize) this.fontSize = s.fontSize;
         if (s.passageSide) this.passageSide = s.passageSide;
+      }
+
+      // Safe fallback for years
+      if (!this.selectedYears || this.selectedYears.length === 0) {
+        this.selectedYears = ['2026', '2025', '2024', '2023', '2022', '2021', '2020', '2019', '2018', '2017', '2016', '2015', '2014', '2013', '2012', '2011', '2010', '2009'];
       }
     } catch (e) {
       console.warn('LocalStorage load failed:', e);
@@ -155,11 +160,12 @@ class LeetApp {
         : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700 hover:text-white';
       return `
         <button 
+          type="button"
           onclick="app.toggleYear('${yr}')" 
-          class="year-chip px-3 py-2 rounded-xl text-xs border transition flex items-center justify-between ${selClass}"
+          class="year-chip px-3 py-2 rounded-xl text-xs border transition flex items-center justify-between cursor-pointer ${selClass}"
         >
           <span>${yr}년</span>
-          <span class="text-[10px] ${isSelected ? 'text-indigo-200' : 'text-slate-500'}">${isSelected ? '✓' : ''}</span>
+          <span class="text-[10px] ${isSelected ? 'text-indigo-200 font-bold' : 'text-slate-500'}">${isSelected ? '✓' : ''}</span>
         </button>
       `;
     }).join('');
@@ -275,6 +281,14 @@ class LeetApp {
     this.saveToStorage();
   }
 
+  startTraining() {
+    if (!this.selectedYears || this.selectedYears.length === 0) {
+      alert('최소 1개 이상의 기출 연도를 선택해 주세요.');
+      return;
+    }
+    this.showView('exam');
+  }
+
   showView(viewName) {
     this.currentView = viewName;
     const homeView = document.getElementById('homeView');
@@ -383,7 +397,7 @@ class LeetApp {
     }
     
     // Multi-Year filter
-    if (this.selectedYears.length > 0) {
+    if (this.selectedYears && this.selectedYears.length > 0) {
       list = list.filter(s => this.selectedYears.includes(String(s.year)));
     }
 
@@ -767,7 +781,8 @@ class LeetApp {
 
       tabsHTML += `
         <button 
-          class="flex-1 py-1.5 px-3 rounded-lg text-xs transition flex items-center justify-center gap-1 ${activeClass}"
+          type="button"
+          class="flex-1 py-1.5 px-3 rounded-lg text-xs transition flex items-center justify-center gap-1 cursor-pointer ${activeClass}"
           onclick="app.scrollToQuestion(${idx})"
         >
           <span>Q${q.qNum}</span>
@@ -813,15 +828,17 @@ class LeetApp {
             <!-- Action Buttons (Bookmark & Memo) -->
             <div class="flex items-center gap-1.5">
               <button 
+                type="button"
                 onclick="app.toggleBookmark('${q.id}')" 
-                class="bookmark-btn px-2.5 py-1 rounded-lg text-xs font-bold border transition flex items-center gap-1 ${isBookmarked ? 'active bg-amber-100 text-amber-800 border-amber-300' : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200'}"
+                class="bookmark-btn px-2.5 py-1 rounded-lg text-xs font-bold border transition flex items-center gap-1 cursor-pointer ${isBookmarked ? 'active bg-amber-100 text-amber-800 border-amber-300' : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200'}"
                 title="중요 문항 북마크"
               >
                 <span>${isBookmarked ? '⭐ 북마크됨' : '☆ 북마크'}</span>
               </button>
               <button 
+                type="button"
                 onclick="app.toggleMemo('${q.id}')" 
-                class="px-2.5 py-1 rounded-lg text-xs font-semibold border transition flex items-center gap-1 ${memoText ? 'bg-amber-50 text-amber-800 border-amber-300' : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200'}"
+                class="px-2.5 py-1 rounded-lg text-xs font-semibold border transition flex items-center gap-1 cursor-pointer ${memoText ? 'bg-amber-50 text-amber-800 border-amber-300' : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200'}"
                 title="문제별 풀이 메모 작성"
               >
                 📝 <span>${memoText ? '메모 있음' : '메모'}</span>
@@ -918,22 +935,25 @@ class LeetApp {
     html += `
       <div class="flex items-center gap-3 pt-2 pb-8">
         <button 
+          type="button"
           onclick="app.checkCurrentSet()" 
-          class="flex-1 py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:scale-[0.99] text-white font-bold text-sm shadow-md transition flex items-center justify-center gap-2"
+          class="flex-1 py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:scale-[0.99] text-white font-bold text-sm shadow-md transition flex items-center justify-center gap-2 cursor-pointer"
         >
           <span>${isChecked ? '🔄 다시 채점하기' : '✨ 현재 세트 즉시 채점'}</span>
         </button>
         ${this.currentSetIndex < this.filteredSets.length - 1 ? `
           <button 
+            type="button"
             onclick="app.nextSet()" 
-            class="px-5 py-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm shadow transition flex items-center gap-1.5"
+            class="px-5 py-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm shadow transition flex items-center gap-1.5 cursor-pointer"
           >
             <span>다음 세트</span> <span>▶</span>
           </button>
         ` : `
           <button 
+            type="button"
             onclick="app.openExamResultModal()" 
-            class="px-5 py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-sm shadow transition"
+            class="px-5 py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-sm shadow transition cursor-pointer"
           >
             🏆 시험 제출
           </button>
@@ -996,7 +1016,7 @@ class LeetApp {
             <h3 class="text-base font-black">✍️ 실전 문제 풀이 (전체 ${totalSets.reduce((acc, s) => acc + s.questions.length, 0)}문항)</h3>
             <p class="text-xs text-slate-300 mt-0.5">1번부터 순서대로 풀이 후 하단의 최종 제출을 클릭하세요.</p>
           </div>
-          <button onclick="app.openExamResultModal()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 font-black text-xs text-white shadow">
+          <button type="button" onclick="app.openExamResultModal()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 font-black text-xs text-white shadow cursor-pointer">
             채점 및 제출
           </button>
         </div>
@@ -1016,10 +1036,10 @@ class LeetApp {
                   <span class="text-xs font-bold text-slate-500">${set.year}학년도 ${set.subject}</span>
                 </div>
                 <div class="flex items-center gap-1.5">
-                  <button onclick="app.toggleBookmark('${q.id}')" class="text-xs font-bold ${isBookmarked ? 'text-amber-500' : 'text-slate-400 hover:text-slate-600'}">
+                  <button type="button" onclick="app.toggleBookmark('${q.id}')" class="text-xs font-bold cursor-pointer ${isBookmarked ? 'text-amber-500' : 'text-slate-400 hover:text-slate-600'}">
                     ${isBookmarked ? '⭐' : '☆'}
                   </button>
-                  <button onclick="app.toggleMemo('${q.id}')" class="text-xs text-slate-500 hover:text-indigo-600">📝 메모</button>
+                  <button type="button" onclick="app.toggleMemo('${q.id}')" class="text-xs text-slate-500 hover:text-indigo-600 cursor-pointer">📝 메모</button>
                 </div>
               </div>
 
@@ -1059,7 +1079,7 @@ class LeetApp {
 
       questionsHTML += `
         <div class="p-6 text-center">
-          <button onclick="app.openExamResultModal()" class="w-full max-w-md py-4 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-lg shadow-xl">
+          <button type="button" onclick="app.openExamResultModal()" class="w-full max-w-md py-4 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-lg shadow-xl cursor-pointer">
             🏆 전체 시험 제출 및 최종 채점
           </button>
         </div>
@@ -1137,12 +1157,13 @@ class LeetApp {
             </div>
             <div class="flex items-center gap-2">
               <button 
+                type="button"
                 onclick="app.jumpToSpecificQuestion('${s.year}', '${s.subject}', ${q.qNum}); document.getElementById('bookmarksModal').classList.add('hidden');" 
-                class="px-2.5 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs transition"
+                class="px-2.5 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs transition cursor-pointer"
               >
                 풀러가기 ➔
               </button>
-              <button onclick="app.toggleBookmark('${q.id}'); app.renderBookmarksList('${subjectFilter}');" class="text-xs text-slate-400 hover:text-rose-600 transition">
+              <button type="button" onclick="app.toggleBookmark('${q.id}'); app.renderBookmarksList('${subjectFilter}');" class="text-xs text-slate-400 hover:text-rose-600 transition cursor-pointer">
                 ✕ 해제
               </button>
             </div>
@@ -1227,12 +1248,13 @@ class LeetApp {
             </div>
             <div class="flex items-center gap-2">
               <button 
+                type="button"
                 onclick="app.jumpToSpecificQuestion('${item.year}', '${item.subject}', ${item.qNum}); document.getElementById('wrongNotesModal').classList.add('hidden');" 
-                class="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs transition"
+                class="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs transition cursor-pointer"
               >
                 다시풀기 ➔
               </button>
-              <button onclick="app.removeWrongNote('${item.qId}')" class="text-xs text-slate-400 hover:text-rose-600 transition">
+              <button type="button" onclick="app.removeWrongNote('${item.qId}')" class="text-xs text-slate-400 hover:text-rose-600 transition cursor-pointer">
                 ✕ 해제
               </button>
             </div>
@@ -1456,24 +1478,6 @@ class LeetApp {
       }
     });
 
-    // Start Button
-    const startBtn = document.getElementById('homeStartBtn');
-    if (startBtn) {
-      startBtn.addEventListener('click', () => {
-        if (this.selectedYears.length === 0) {
-          alert('최소 1개 이상의 기출 연도를 선택해 주세요.');
-          return;
-        }
-        this.showView('exam');
-      });
-    }
-
-    // Back to Home
-    const backBtn = document.getElementById('backToHomeBtn');
-    if (backBtn) {
-      backBtn.addEventListener('click', () => this.showView('home'));
-    }
-
     // Mobile Tabs
     const tabPassage = document.getElementById('mobileTabPassage');
     const tabQuestions = document.getElementById('mobileTabQuestions');
@@ -1509,49 +1513,39 @@ class LeetApp {
       omrCloseBtn.addEventListener('click', () => omrModal.classList.add('hidden'));
     }
 
-    // Bookmark Modal Listeners
-    const openBookmarkBtn = document.getElementById('homeOpenBookmarksBtn');
+    // Modal Close Buttons
     const closeBookmarkBtn = document.getElementById('closeBookmarksBtn');
-    const startRetryBookmarkBtn = document.getElementById('startRetryBookmarkBtn');
-
-    if (openBookmarkBtn) openBookmarkBtn.addEventListener('click', () => this.openBookmarksModal());
     if (closeBookmarkBtn) {
       const modal = document.getElementById('bookmarksModal');
       closeBookmarkBtn.addEventListener('click', () => modal && modal.classList.add('hidden'));
     }
-    if (startRetryBookmarkBtn) {
-      startRetryBookmarkBtn.addEventListener('click', () => {
-        const modal = document.getElementById('bookmarksModal');
-        if (modal) modal.classList.add('hidden');
-        this.targetFilter = 'bookmark';
-        this.showView('exam');
-      });
-    }
 
-    // Wrong Notes Modal Listeners
-    const openWrongBtn = document.getElementById('homeOpenWrongNotesBtn');
     const closeWrongBtn = document.getElementById('closeWrongNotesBtn');
-    const startRetryWrongBtn = document.getElementById('startRetryWrongBtn');
-    
-    if (openWrongBtn) openWrongBtn.addEventListener('click', () => this.openWrongNotesModal());
     if (closeWrongBtn) {
       const modal = document.getElementById('wrongNotesModal');
       closeWrongBtn.addEventListener('click', () => modal && modal.classList.add('hidden'));
     }
-    if (startRetryWrongBtn) {
-      startRetryWrongBtn.addEventListener('click', () => {
-        const modal = document.getElementById('wrongNotesModal');
-        if (modal) modal.classList.add('hidden');
-        this.targetFilter = 'wrong';
-        this.showView('exam');
-      });
-    }
 
-    // Result Modal
     const closeResultBtn = document.getElementById('closeResultModalBtn');
     const resultModal = document.getElementById('resultReportModal') || document.getElementById('examResultModal');
     if (closeResultBtn && resultModal) {
       closeResultBtn.addEventListener('click', () => resultModal.classList.add('hidden'));
+    }
+
+    // Mobile Guide Modal
+    const mobileGuideBtn = document.getElementById('homeMobileGuideBtn');
+    const mobileGuideModal = document.getElementById('mobileGuideModal');
+    const closeMobileGuideBtn = document.getElementById('closeMobileGuideBtn');
+    const closeMobileGuideBtn2 = document.getElementById('closeMobileGuideBtn2');
+
+    if (mobileGuideBtn && mobileGuideModal) {
+      mobileGuideBtn.addEventListener('click', () => mobileGuideModal.classList.remove('hidden'));
+    }
+    if (closeMobileGuideBtn && mobileGuideModal) {
+      closeMobileGuideBtn.addEventListener('click', () => mobileGuideModal.classList.add('hidden'));
+    }
+    if (closeMobileGuideBtn2 && mobileGuideModal) {
+      closeMobileGuideBtn2.addEventListener('click', () => mobileGuideModal.classList.add('hidden'));
     }
 
     // Shortcuts Modal
@@ -1659,7 +1653,16 @@ class LeetApp {
   }
 }
 
-// Global App Instance
-document.addEventListener('DOMContentLoaded', () => {
-  window.app = new LeetApp();
-});
+// Global App Instance (Immediate and Event Fallback)
+function initLeetApp() {
+  if (!window.app) {
+    window.app = new LeetApp();
+  }
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initLeetApp);
+} else {
+  initLeetApp();
+}
+window.addEventListener('load', initLeetApp);
