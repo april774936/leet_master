@@ -121,6 +121,7 @@ class LeetApp {
         if (s.limit) this.selectedLimit = s.limit;
         if (s.mode) this.examMode = s.mode;
         if (s.targetFilter) this.targetFilter = s.targetFilter;
+        if (s.shuffle !== undefined) this.isShuffled = s.shuffle;
         if (s.fontSize) this.fontSize = s.fontSize;
         if (s.passageSide) this.passageSide = s.passageSide;
       }
@@ -147,6 +148,7 @@ class LeetApp {
         limit: this.selectedLimit,
         mode: this.examMode,
         targetFilter: this.targetFilter,
+        shuffle: this.isShuffled,
         fontSize: this.fontSize,
         passageSide: this.passageSide
       }));
@@ -191,6 +193,11 @@ class LeetApp {
     this.updateSelectedYearsCountBadge();
   }
 
+
+  toggleShuffle(checked) {
+    this.isShuffled = checked;
+    this.saveToStorage();
+  }
   toggleYear(yr) {
     if (this.selectedYears.includes(yr)) {
       this.selectedYears = this.selectedYears.filter(y => y !== yr);
