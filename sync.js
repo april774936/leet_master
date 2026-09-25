@@ -3,8 +3,8 @@
 // 로그인 없이, 모든 기기에 똑같은 "동기화 코드"를 넣는 방식입니다 (개인용, 비민감 데이터 전제).
 (function () {
   // ↓↓↓ 아래 두 값을 본인 Supabase 프로젝트 값으로 바꿔주세요 ↓↓↓
-  const SUPABASE_URL = 'https://YOUR-PROJECT-REF.supabase.co';
-  const SUPABASE_ANON_KEY = 'YOUR-ANON-PUBLIC-KEY';
+  const SUPABASE_URL = 'https://djzzjezjlemvxzjiusly.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_axIbnWAf3nLWvTYjEyXI6A_omvOu1nT';
   // ↑↑↑ ---------------------------------------------- ↑↑↑
 
   const TABLE = 'leet_sync';
