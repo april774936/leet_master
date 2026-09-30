@@ -146,6 +146,10 @@ const SUPABASE_ANON_KEY = 'sb_publishable_axIbnWAf3nLWvTYjEyXI6A_omvOu1nT';
     badgeEl.addEventListener('mouseenter', () => (badgeEl.style.opacity = '1'));
     badgeEl.addEventListener('mouseleave', () => (badgeEl.style.opacity = '.85'));
     badgeEl.addEventListener('click', openSetupPrompt);
+    // 폰에서는 아이콘만 표시(지문/보기 마지막 줄을 가리지 않게) — 전체 문구는 title로
+    const st = document.createElement('style');
+    st.textContent = '@media (max-width:640px){#leetSyncBadge .sb-txt{display:none}#leetSyncBadge{padding:7px 9px!important;bottom:calc(12px + env(safe-area-inset-bottom,0px))!important;right:12px!important}}';
+    document.head.appendChild(st);
     document.body.appendChild(badgeEl);
     return badgeEl;
   }
@@ -161,7 +165,12 @@ const SUPABASE_ANON_KEY = 'sb_publishable_axIbnWAf3nLWvTYjEyXI6A_omvOu1nT';
       synced: `☁️ 동기화됨 · ${code}`,
       error: '⚠️ 동기화 오류 · 클릭'
     };
-    el.textContent = map[state] || map.nocode;
+    const text = map[state] || map.nocode;
+    const sp = text.indexOf(' ');
+    const ico = document.createElement('span'); ico.textContent = text.slice(0, sp);
+    const txt = document.createElement('span'); txt.className = 'sb-txt'; txt.textContent = text.slice(sp);
+    el.replaceChildren(ico, txt);
+    el.title = text;
   }
 
   function openSetupPrompt() {
